@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/Johnny-Zou/mafia-game/issues"
   },
-  "homepage": "https://github.com/Johnny-Zou/mafia-game#readme"
+  "homepage": "https://github.com/Johnny-Zou/mafia-game#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "ejs": "^2.6.1",
+    "express": "^4.16.3",
+    "mongojs": "^2.5.0"
+  }
 }
