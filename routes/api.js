@@ -9,21 +9,23 @@ var db = mongojs('mongodb://mafia_admin:bestappever_mafia_admin123@ds145790.mlab
 
 // Get All Games
 router.get('/game', function(req, res, next){
-    db.game.find(function(err, game){
+    db.game.find(function(err, allGames){
         if(err){
             res.send(err);
         }
-        res.json(game);
+        res.json(allGames);
     });
 });
 
 // Get Single game
 router.get('/game/:id', function(req, res, next){
-    db.game.findOne({"game_id": mongojs.ObjectId(req.params.id)}, function(err, game){
+    console.log(req.params.id);
+    console.log(typeof(req.params.id));
+    db.game.findOne({"game_id": parseInt(req.params.id)}, function(err, singleGame){
         if(err){
             res.send(err);
         }
-        res.json(game);
+        res.json(singleGame);
     });
 });
 
