@@ -33,11 +33,18 @@ router.get('/game/:id', function(req, res, next){
 router.post('/game', function(req, res, next){
     var newGame = req.body;
 
+    console.log(newGame);
+
     //Check that all the fields are completed
     var game_id_complete = !newGame.game_id;
     var player_num_complete = !newGame.player_num;
 
+
+    console.log(game_id_complete,player_num_complete);
+    
     var uncompletedFields = game_id_complete || player_num_complete;
+
+
 
     if(uncompletedFields){
         res.status(400);
