@@ -11,20 +11,22 @@ var db = mongojs('mongodb://mafia_admin:bestappever_mafia_admin123@ds145790.mlab
 router.get('/game', function(req, res, next){
     db.game.find(function(err, gameList){
         if(err){
+            console.log("GET request to /game: ERROR-",err);
             res.send(err);
         }
+        console.log("GET request to /game: SUCCESS,",gameList);
         res.json(gameList);
     });
 });
 
 // Get Single game
 router.get('/game/:id', function(req, res, next){
-    console.log(req.params.id);
-    console.log(typeof(req.params.id));
     db.game.findOne({"game_id": parseInt(req.params.id)}, function(err, game){
         if(err){
+            console.log("GET request to /game/id: ERROR-",err);
             res.send(err);
         }
+        console.log("GET request to /game/id: SUCCESS,",game);
         res.json(game);
     });
 });
@@ -33,29 +35,28 @@ router.get('/game/:id', function(req, res, next){
 router.post('/game', function(req, res, next){
     var newGame = req.body;
 
-    console.log(newGame);
-
     //Check that all the fields are completed
     var game_id_complete = !newGame.game_id;
     var player_num_complete = !newGame.player_num;
 
-
-    console.log(game_id_complete,player_num_complete);
-    
     var uncompletedFields = game_id_complete || player_num_complete;
 
-
-
     if(uncompletedFields){
+        console.log("Post request to /game: ERROR uncomplete fields with body",newGame);
+        console.log("game_id missing:", game_id_complete);
+        console.log("player_num missing:", player_num_complete);
         res.status(400);
         res.json({
             "error": "Bad Data"
         });
     } else {
+        console.log("Post request to /game:",newGame);
         db.game.save(newGame, function(err, game){
             if(err){
+                console.log("Post request to /game: ERROR,",err);
                 res.send(err);
             }
+            console.log("Post request to /game: SUCCESS,",game);
             res.json(game);
         });
     }
@@ -65,8 +66,10 @@ router.post('/game', function(req, res, next){
 router.delete('/game/:id', function(req, res, next){
     db.game.remove({"game_id": parseInt(req.params.id)}, function(err, game){
         if(err){
+            console.log("Delete request to /game/:id: ERROR,",err);
             res.send(err);
         }
+        console.log("Delete request to /game/:id: SUCCESS",game)
         res.json(game);
     });
 });
@@ -85,6 +88,7 @@ router.put('/game/:id', function(req, res, next){
 
     // Check empty
     if(!updateGame){
+        console.log("Put request to /game/:id: ERROR uncomplete fields with body,",updateGame);
         res.status(400);
         res.json({
             "error":"Bad Data"
@@ -92,8 +96,10 @@ router.put('/game/:id', function(req, res, next){
     } else {
         db.game.update({"game_id": parseInt(req.params.id)}, updateGame, {}, function(err, game){
         if(err){
+            console.log("Put request to /game/:id: DB ERROR with body,",updateGame);
             res.send(err);
         }
+        onsole.log("Put request to /game/:id: SUCCESS",updateGame);
         res.json(game);
     });
     }
