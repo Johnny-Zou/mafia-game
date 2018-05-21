@@ -99,7 +99,7 @@ router.put('/game/:id', function(req, res, next){
             console.log("Put request to /game/:id: DB ERROR with body,",updateGame);
             res.send(err);
         }
-        onsole.log("Put request to /game/:id: SUCCESS",updateGame);
+        console.log("Put request to /game/:id: SUCCESS",updateGame);
         res.json(game);
     });
     }
