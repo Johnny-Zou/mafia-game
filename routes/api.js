@@ -82,7 +82,7 @@ router.put('/game/:id', function(req, res, next){
     //Do not update the game ID
 
     //Update the numebr of players
-    if(game.player_num){
+    if(gameInput.player_num){
         updateGame.player_num = gameInput.player_num;
     }
 
@@ -95,13 +95,13 @@ router.put('/game/:id', function(req, res, next){
         });
     } else {
         db.game.update({"game_id": parseInt(req.params.id)}, updateGame, {}, function(err, game){
-        if(err){
-            console.log("Put request to /game/:id: DB ERROR with body,",updateGame);
-            res.send(err);
-        }
-        console.log("Put request to /game/:id: SUCCESS",updateGame);
-        res.json(game);
-    });
+            if(err){
+                console.log("Put request to /game/:id: DB ERROR with body,",updateGame);
+                res.send(err);
+            }
+            console.log("Put request to /game/:id: SUCCESS",updateGame);
+            res.json(game);
+        });
     }
 });
 
