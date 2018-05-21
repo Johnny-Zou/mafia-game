@@ -21,10 +21,18 @@ router.get('/game', function(req, res, next){
 
 // Get Single game
 router.get('/game/:id', function(req, res, next){
-    db.game.findOne({"game_id": parseInt(req.params.id)}, function(err, game){
+    db.game.findOne({"game_id": req.params.id}, function(err, game){
         if(err){
             console.log("GET request to /game/id: ERROR-",err);
             res.send(err);
+        }
+        else if(!game){
+            console.log("Could not find game");
+            res.status(400);
+            res.json({
+                "error": "No game found"
+            });
+            return;
         }
         console.log("GET request to /game/id: SUCCESS,",game);
         res.json(game);
@@ -64,10 +72,18 @@ router.post('/game', function(req, res, next){
 
 // Delete game
 router.delete('/game/:id', function(req, res, next){
-    db.game.remove({"game_id": parseInt(req.params.id)}, function(err, game){
+    db.game.remove({"game_id": req.params.id}, function(err, game){
         if(err){
             console.log("Delete request to /game/:id: ERROR,",err);
             res.send(err);
+        }
+        if(!game){
+            console.log("Could not find game");
+            res.status(400);
+            res.json({
+                "error": "No game found"
+            });
+            return;
         }
         console.log("Delete request to /game/:id: SUCCESS",game)
         res.json(game);
@@ -94,10 +110,18 @@ router.put('/game/:id', function(req, res, next){
             "error":"Bad Data"
         });
     } else {
-        db.game.update({"game_id": parseInt(req.params.id)}, updateGame, {}, function(err, game){
+        db.game.update({"game_id": req.params.id}, updateGame, {}, function(err, game){
             if(err){
                 console.log("Put request to /game/:id: DB ERROR with body,",updateGame);
                 res.send(err);
+            }
+            if(!game){
+                console.log("Could not find game");
+                res.status(400);
+                res.json({
+                    "error": "No game found"
+                });
+                return;
             }
             console.log("Put request to /game/:id: SUCCESS",updateGame);
             res.json(game);
