@@ -28,9 +28,20 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 // Routes
-app.use('/', game);
+app.use('/game', game);
 app.use('/api', api);
 
-app.listen(port,function(){
+var server = app.listen(port,function(){
     console.log("Server started on port " + port);
 });
+
+//socket stuff
+var io = require('socket.io')(server);
+var gameNamespace = io.of('/game');
+
+gameNamespace.on("connection",function(socket){
+    console.log("client connected: ",socket);
+    
+    require('./sockets/chatSocket')(gameNamespace,socket);
+    require('./sockets/gameSocket')(gameNamespace,socket);
+})
