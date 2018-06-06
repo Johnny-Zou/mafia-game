@@ -43,7 +43,7 @@ module.exports = function(server,clientSocket){
                     var newPersonLoop = {player_name: client.nickname};
                     console.log("new person,",newPersonLoop);
                     server.to(clientSocket.id).emit('newUserInGameRoom',newPersonLoop);
-                }
+                });
             });
         });
     });
