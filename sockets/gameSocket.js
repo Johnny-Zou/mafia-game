@@ -40,7 +40,7 @@ module.exports = function(server,clientSocket){
                 console.log(clients);
                 // clients will be array of socket ids , currently available in given room
                 clients.forEach(function(client) {
-                    var newPersonLoop = {player_name: client.nickname};
+                    var newPersonLoop = {player_name: server.connected[client].nickname};
                     console.log("new person,",newPersonLoop);
                     server.to(clientSocket.id).emit('newUserInGameRoom',newPersonLoop);
                 });
