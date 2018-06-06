@@ -1,13 +1,34 @@
 import React, { Component } from 'react';
 
+import '../chat.css';
 
 class Lobby extends Component {
 	constructor(props) {
 	  	super(props);
 
+	  	this.handleCurrentMsgChange = this.handleCurrentMsgChange.bind(this);
 		this.navigateBack = this.navigateBack.bind(this);
+		this.sendMsg = this.sendMsg.bind(this);
 
 	  	this.state = {	player_list: [this.props.player_name],
+	  					chat_log: [{player_name: "Johnny", message: "hello!!!"},
+{player_name: "Johnny", message: "hello!!!"},
+{player_name: "Johnny", message: "hello!!!"},
+{player_name: "Johnny", message: "hello!!!"},
+{player_name: "Johnny", message: "hello!!!"},
+{player_name: "Johnny", message: "hello!!!"},
+{player_name: "Johnny", message: "hello!!!"},
+{player_name: "Johnny", message: "hello!!!"},
+{player_name: "Johnny", message: "hello!!!"},
+{player_name: "Johnny", message: "hello!!!"}
+
+
+
+
+
+
+	  					],
+	  					current_msg: "",
 	  				};
 	}
 
@@ -15,7 +36,43 @@ class Lobby extends Component {
 		this.props.onPageChange("Welcome");	
 	}
 
+	handleCurrentMsgChange(e){
+		this.setState({current_msg: e.target.value});
+	}
 
+
+	//LifeCycle functions
+	componentDidMount(){
+		
+		const client = this.props.client;
+
+		//Join the game room
+		client.emit('joinGameRoom', {game_id: this.props.game_id, player_name: this.props.player_name});
+
+		// Socket event listeners
+		client.on('messageToClient',function(data){
+			var currentMsgList = this.state.chat_log;
+			var newMessage = {player_name: data.player_name, message: data.message};
+			currentMsgList.push(newMessage);
+			this.setState({chat_log: currentMsgList});
+		});
+
+		client.on('newUserInGameRoom',function(data){
+			var currentPlayerList = this.state.player_list;
+			currentPlayerList.push(data.player_name);
+			this.setState({player_list: currentPlayerList});
+		})
+	}
+
+	sendMsg(){
+		const client = this.props.client;
+
+		var message = {player_name: this.props.player_name, message: this.state.current_msg, game_id: this.props.game_id};
+		client.emit("messageToServer",message);
+
+		//clear the current msg
+		this.setState({current_msg: ""});
+	}
 
 
 
@@ -25,6 +82,14 @@ class Lobby extends Component {
 									<td>{playerName}</td>
 								</tr>
 							);
+		const messageList = this.state.chat_log.map((chatMessage) =>
+
+								<div className="newMessage">
+									<bold>{chatMessage.player_name}:</bold> {chatMessage.message}
+								</div>
+							);
+
+
 		return (
 			<div>
 				<div className="text-center">
@@ -33,8 +98,8 @@ class Lobby extends Component {
 					<p>Hey {this.props.player_name}, Welcome to your game lobby </p>
 
 					<div className ="container">
-						<div class="card bg-primary text-white">
-							<div class="card-body">Game ID: {this.props.game_id}</div>
+						<div className="card bg-primary text-white">
+							<div className="card-body">Game ID: {this.props.game_id}</div>
 						</div>
 					</div>
 
@@ -43,23 +108,40 @@ class Lobby extends Component {
     			<br/>
 
     			<div className="container">
-	    			<table class="table table-dark table-hover table-bordered table-striped">
+    				<div className="row">
+    					<div className="col-md-6">
+			    			<table className="table table-dark table-hover table-bordered table-striped">
+				    			<thead>
+							      <tr>
+							        <th>Player Name</th>
+							      </tr>
+							    </thead>
 
-		    			<thead>
-					      <tr>
-					        <th>Player Name</th>
-					      </tr>
-					    </thead>
-
-					    <tbody>
-					      {playerList}
-					    </tbody>
-	    			</table>
+							    <tbody>
+							      {playerList}
+							    </tbody>
+			    			</table>
+		    			</div>
+		    			<div className="col-md-6">
+		    				<div className="chatContainer rounded bg-light">
+		    					<div className="chatInnerMsgContainer">
+		    						<div className="chatInnerInnerMsgContainer">
+		    							{messageList}
+		    						</div>
+		    					</div>
+		    					<div className="chatBottom">
+		    						<textarea className="chatTextBox" value={this.state.current_msg} onChange={this.handleCurrentMsgChange} name="msg"></textarea>
+		    						<button type="button" className="chatSubmitTextButton btn btn-info" onClick={this.sendMsg}>Send</button>
+		    					</div>
+		    				</div>
+		    			</div>
+	    			</div>
 	    		</div>
+	    		<br/>
+	    		<br/>
     			
-    			<div className="text-center">
-	    			<div className="container">
-	  				<div className="row justify-content-center">
+    			<div className="container">
+	  				<div className="row justify-content-center text-center">
 	  					<div className="col-2">
 				       		<button type="button" className="btn btn-primary" onClick={this.createGame}>Start Game</button>
 				       	</div>
@@ -71,7 +153,6 @@ class Lobby extends Component {
 		       		<br/>
 		        
 		       		<p id="errorMsg"></p>
-		       	</div>
 			</div>
 		);
 	}

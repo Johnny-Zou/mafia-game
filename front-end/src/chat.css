@@ -1,0 +1,47 @@
+.chatContainer{
+	position: relative;
+	height: 40vh;
+	width: 100%;
+}
+
+.chatContainer .chatInnerMsgContainer{
+	position: absolute;
+	top: 10px;
+	transform: translateX(10px);
+
+	height: calc(75% - 20px);
+	width: calc(100% - 20px);
+	overflow: hidden;
+
+}
+
+.chatContainer .chatInnerMsgContainer .chatInnerInnerMsgContainer{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	overflow-y: scroll;
+}
+
+
+
+.chatBottom{
+	position: absolute;
+	bottom: 10px;
+	transform: translateX(10px);
+
+	height: 20%;
+	width: calc(100% - 20px);
+
+	display: flex;
+	justify-content: space-between;
+}
+
+
+.chatTextBox{
+	flex: 1;
+	margin-right: 10px;
+}
+
+.chatSubmitTextButton{
+	width: 20%;
+}

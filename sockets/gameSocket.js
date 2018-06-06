@@ -3,7 +3,7 @@ module.exports = function(server,clientSocket){
     
     //Add the player to the game room
     clientSocket.on("joinGameRoom", function(data){
-    	// Error checking
+    	/* // Error checking
     		//check if the game is currently running 
     	var clientGameInfo;
     	db.game.findOne({"game_id": toString(data.game_id)}, function(err, game){
@@ -25,10 +25,11 @@ module.exports = function(server,clientSocket){
 
 
     	let gameRoom = toString(data.game_id);
-
-        clientSocket.join(gameRoom,function(){
+*/
+        clientSocket.join(toString(data.game_id),function(){
         	//tell the other people in the room that you have joined
-        	server.to(gameRoom).emit("newUserInGameRoom",data);
+            var newPerson = {player_name = data.player_name};
+        	server.to(toString(data.game_id)).emit("newUserInGameRoom",newPerson);
         })
     });
 

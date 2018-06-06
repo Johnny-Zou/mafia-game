@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import io from 'socket.io-client';
 
-import './App.css';
+import './bootstrap.css';
 
 import Welcome from './components/Welcome.js';
 import JoinGame from './components/JoinGame.js';
@@ -46,9 +46,6 @@ class App extends Component {
   		}
   	}
 
-  	// Lifecycles
-
-
 
 	render() {
 		switch(this.state.page){
@@ -66,7 +63,7 @@ class App extends Component {
 				);
 			case "Lobby":
 				return (
-					<Lobby player_name = {this.state.player_name} game_id = {this.state.game_id} onPageChange = {this.handlePageChange}/>
+					<Lobby client = {this.state.client} player_name = {this.state.player_name} game_id = {this.state.game_id} onPageChange = {this.handlePageChange}/>
 				);
 			default:
 				return (
