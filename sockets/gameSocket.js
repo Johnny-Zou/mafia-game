@@ -28,7 +28,7 @@ module.exports = function(server,clientSocket){
 */
         clientSocket.join(toString(data.game_id),function(){
         	//tell the other people in the room that you have joined
-            var newPerson = {player_name = data.player_name};
+            var newPerson = {player_name: data.player_name};
         	server.to(toString(data.game_id)).emit("newUserInGameRoom",newPerson);
         });
     });
