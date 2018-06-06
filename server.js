@@ -40,7 +40,7 @@ var io = require('socket.io')(server);
 //var gameNamespace = io.of('/game');
 
 io.on("connection",function(socket){
-    console.log("client connected: ",socket);
+    console.log("client connected");
     
     require('./sockets/chatSocket')(io,socket);
     require('./sockets/gameSocket')(io,socket);

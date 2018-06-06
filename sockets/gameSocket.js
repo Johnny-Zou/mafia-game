@@ -32,7 +32,9 @@ module.exports = function(server,clientSocket){
         })
     });
 
-
+    clientSocket.on('disconnect',function(data){
+        console.log("Client Disconnected");
+    })
 
 
 };
