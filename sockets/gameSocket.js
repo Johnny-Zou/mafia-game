@@ -31,19 +31,18 @@ module.exports = function(server,clientSocket){
 
         //To everyone else in the gameRoom add a new person
         var newPerson = {player_name: data.player_name};
-        server.to(toString(data.game_id)).emit("newUserInGameRoom",newPerson);
+        server.to(data.game_id).emit("newUserInGameRoom",newPerson);
 
-        clientSocket.join(toString(data.game_id),function(){
+        clientSocket.join(data.game_id,function(){
         	//tell the other people in the room that you have joined
 
-            server.in(toString(data.game_id)).clients((err , clients) => {
+            server.in(data.game_id).clients((err , clients) => {
                 // clients will be array of socket ids , currently available in given room
                 clients.forEach(function(client) {
-                    console.log(server)
                     var newPersonLoop = {player_name: server.of("/").connected[client].nickname};
                     console.log("new person,",newPersonLoop);
                     server.to(clientSocket.id).emit('newUserInGameRoom',newPersonLoop);
-                };
+                });
             });
         });
     });
