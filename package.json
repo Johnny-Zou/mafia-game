@@ -18,6 +18,7 @@
   "homepage": "https://github.com/Johnny-Zou/mafia-game#readme",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "create-react-app": "^1.5.2",
     "ejs": "^2.6.1",
     "express": "^4.16.3",
     "mongojs": "^2.5.0",

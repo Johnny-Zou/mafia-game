@@ -14,21 +14,21 @@ var app = express();
 // View Engine
 
 //set the views directly 
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, './front-end/build'));
 //set the view engine
 app.set('view engine','ejs');
 //template engine
 app.engine('html', require('ejs').renderFile);
 
 // Static Files
-app.use(express.static(path.join(__dirname,"client")));
+app.use(express.static(path.join(__dirname,"./front-end/build")));
 
 // BodyParser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 // Routes
-app.use('/game', game);
+app.use('/', game);
 app.use('/api', api);
 
 var server = app.listen(port,function(){
