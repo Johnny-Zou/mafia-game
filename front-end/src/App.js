@@ -25,7 +25,7 @@ class App extends Component {
 		this.state = {	page: "Welcome",
 						player_name: "",
 						game_id: "",
-						client: socket;
+						client: socket
 					};
 	}
 
