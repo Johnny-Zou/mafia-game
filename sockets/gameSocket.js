@@ -6,7 +6,7 @@ module.exports = function(server,clientSocket){
     	// Error checking
     		//check if the game is currently running 
     	var clientGameInfo;
-    	db.game.findOne({"game_id": toString(data.game_id}, function(err, game){
+    	db.game.findOne({"game_id": toString(data.game_id}), function(err, game){
 	        if(err){
 	        	console.log("joinGameRoom Error in finding game")
 	        }
