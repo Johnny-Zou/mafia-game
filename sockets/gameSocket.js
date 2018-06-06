@@ -36,7 +36,7 @@ module.exports = function(server,clientSocket){
         clientSocket.join(toString(data.game_id),function(){
         	//tell the other people in the room that you have joined
 
-            server.in(data.game_id).clients((err , clients) => {
+            server.in(toString(data.game_id)).clients((err , clients) => {
                 console.log(clients);
                 // clients will be array of socket ids , currently available in given room
                 var newPersonLoop = {player_name: clients.nickname};
