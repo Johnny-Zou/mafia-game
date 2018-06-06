@@ -9,25 +9,10 @@ class Lobby extends Component {
 	  	this.handleCurrentMsgChange = this.handleCurrentMsgChange.bind(this);
 		this.navigateBack = this.navigateBack.bind(this);
 		this.sendMsg = this.sendMsg.bind(this);
+		this.componentDidMount = this.componentDidMount.bind(this);
 
-	  	this.state = {	player_list: [this.props.player_name],
-	  					chat_log: [{player_name: "Johnny", message: "hello!!!"},
-{player_name: "Johnny", message: "hello!!!"},
-{player_name: "Johnny", message: "hello!!!"},
-{player_name: "Johnny", message: "hello!!!"},
-{player_name: "Johnny", message: "hello!!!"},
-{player_name: "Johnny", message: "hello!!!"},
-{player_name: "Johnny", message: "hello!!!"},
-{player_name: "Johnny", message: "hello!!!"},
-{player_name: "Johnny", message: "hello!!!"},
-{player_name: "Johnny", message: "hello!!!"}
-
-
-
-
-
-
-	  					],
+	  	this.state = {player_list: [],
+	  					chat_log: [],
 	  					current_msg: "",
 	  				};
 	}
@@ -50,19 +35,25 @@ class Lobby extends Component {
 		client.emit('joinGameRoom', {game_id: this.props.game_id, player_name: this.props.player_name});
 
 		// Socket event listeners
-		client.on('messageToClient',function(data){
-			var currentMsgList = this.state.chat_log;
-			var newMessage = {player_name: data.player_name, message: data.message};
-			currentMsgList.push(newMessage);
-			this.setState({chat_log: currentMsgList});
-		});
-
-		client.on('newUserInGameRoom',function(data){
-			var currentPlayerList = this.state.player_list;
-			currentPlayerList.push(data.player_name);
-			this.setState({player_list: currentPlayerList});
-		})
+		client.on('messageToClient', this._messageToClient.bind(this));
+		client.on('newUserInGameRoom', this._newUserInGameRoom.bind(this));
 	}
+
+	_messageToClient(data){
+		var currentMsgList = this.state.chat_log;
+		var newMessage = {player_name: data.player_name, message: data.message};
+		currentMsgList.push(newMessage);
+		this.setState({chat_log: currentMsgList});
+
+	}
+
+	_newUserInGameRoom(data){
+		var currentPlayerList = this.state.player_list;
+		currentPlayerList.push(data.player_name);
+		this.setState({player_list: currentPlayerList});
+	}
+
+
 
 	sendMsg(){
 		const client = this.props.client;

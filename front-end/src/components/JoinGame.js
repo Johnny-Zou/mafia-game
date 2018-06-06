@@ -31,7 +31,7 @@ class JoinGame extends Component {
 	}
 
 	render() {
-		const errorMsg = this.state.errorName ? (
+		const errorMsg = this.state.errorGame ? (
 				<p>Error, you must enter a player name</p>
 			):(
 				<p></p>

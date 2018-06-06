@@ -25,11 +25,22 @@ module.exports = function(server,clientSocket){
 
 
     	let gameRoom = toString(data.game_id);
+
 */
+        clientSocket.nickname = data.player_name;
+
+        //To everyone else in the gameRoom add a new person
+        var newPerson = {player_name: data.player_name};
+        server.to(toString(data.game_id)).emit("newUserInGameRoom",newPerson);
+
         clientSocket.join(toString(data.game_id),function(){
         	//tell the other people in the room that you have joined
-            var newPerson = {player_name: data.player_name};
-        	server.to(toString(data.game_id)).emit("newUserInGameRoom",newPerson);
+            var listOfRoomUsers = io.sockets.clients(data.game_id);
+
+            listOfRoomUsers.forEach(function(client) {
+                var newPerson = {player_name: client.nickname};
+                server.to(clientSocket.id).emit('newUserInGameRoom',newPerson);
+            });
         });
     });
 
