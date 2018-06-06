@@ -69,14 +69,14 @@ class Lobby extends Component {
 
 	render() {
 		const playerList = this.state.player_list.map((playerName) =>
-								<tr>
+								<tr key={playerName}>
 									<td>{playerName}</td>
 								</tr>
 							);
-		const messageList = this.state.chat_log.map((chatMessage) =>
+		const messageList = this.state.chat_log.map((chatMessage,index) =>
 
-								<div className="newMessage">
-									<bold>{chatMessage.player_name}:</bold> {chatMessage.message}
+								<div className="newMessage" key={chatMessage.player_name + index}>
+									<a class="font-weight-bold">{chatMessage.player_name}:</a> {chatMessage.message}
 								</div>
 							);
 
