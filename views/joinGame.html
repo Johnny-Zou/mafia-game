@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Mafia - the party game</title>    
+        <title>Join Game | Mafia - the party game</title>    
 
         <!-- jQuery -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -17,26 +17,25 @@
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 		<!-- socketio -->
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
 
 		<!-- event scripts -->
 		<script src="../client/clientEvents.js"></script>
     </head>
     
     <body>
-        
-        <h1> Welcome to mafia </h1>
+        <h1>Join Game | Mafia - the party game</h1>
         <br>
         <br>
 
-    	<input id="player_name" type="text" name="playerName">
+        <p id="greeting"></p>
+
+    	<input id="game_id" type="text" name="gameID">
     	<br>
-       	<button type="button" class="btn btn-primary" onclick="joinRoom()">Join Room</button>
+       	<button type="button" class="btn btn-primary" onclick="backToLanding()">Back</button>
        	<br>
-       	<button type="button" class="btn btn-primary" onclick="createRoom()">Create Room</button>
+       	<button type="button" class="btn btn-primary" onclick="submitJoin()">Submit</button>
        	<br>
         
-       	<p id="errorMsg"></p>
-
     </body>
 </html>

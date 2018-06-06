@@ -37,11 +37,11 @@ var server = app.listen(port,function(){
 
 //socket stuff
 var io = require('socket.io')(server);
-var gameNamespace = io.of('/game');
+//var gameNamespace = io.of('/game');
 
-gameNamespace.on("connection",function(socket){
+io.on("connection",function(socket){
     console.log("client connected: ",socket);
     
-    require('./sockets/chatSocket')(gameNamespace,socket);
-    require('./sockets/gameSocket')(gameNamespace,socket);
+    require('./sockets/chatSocket')(io,socket);
+    require('./sockets/gameSocket')(io,socket);
 })
