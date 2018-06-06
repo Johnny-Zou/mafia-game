@@ -30,12 +30,12 @@ module.exports = function(server,clientSocket){
         	//tell the other people in the room that you have joined
             var newPerson = {player_name = data.player_name};
         	server.to(toString(data.game_id)).emit("newUserInGameRoom",newPerson);
-        })
+        });
     });
 
     clientSocket.on('disconnect',function(data){
         console.log("Client Disconnected");
-    })
+    });
 
 
 };

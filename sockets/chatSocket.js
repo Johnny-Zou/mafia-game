@@ -7,5 +7,5 @@ module.exports = function(server,clientSocket){
 
 		server.to(toString(data.game_id)).emit("messageToClient",newMessageForClient);
 
-	}
+	});
 }
