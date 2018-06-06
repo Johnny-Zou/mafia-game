@@ -37,13 +37,14 @@ module.exports = function(server,clientSocket){
         	//tell the other people in the room that you have joined
 
             server.in(toString(data.game_id)).clients((err , clients) => {
-                console.log(clients);
+                console.log(server);
                 // clients will be array of socket ids , currently available in given room
                 clients.forEach(function(client) {
+                    console.log(server)
                     var newPersonLoop = {player_name: server.connected[client].nickname};
                     console.log("new person,",newPersonLoop);
                     server.to(clientSocket.id).emit('newUserInGameRoom',newPersonLoop);
-                });
+                }.bind(server));
             });
         });
     });
