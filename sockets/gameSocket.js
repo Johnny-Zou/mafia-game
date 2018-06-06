@@ -39,9 +39,11 @@ module.exports = function(server,clientSocket){
             server.in(toString(data.game_id)).clients((err , clients) => {
                 console.log(clients);
                 // clients will be array of socket ids , currently available in given room
-                var newPersonLoop = {player_name: clients.nickname};
-                console.log("new person,",newPersonLoop);
-                server.to(clientSocket.id).emit('newUserInGameRoom',newPersonLoop);
+                clients.forEach(function(client) {
+                    var newPersonLoop = {player_name: client.nickname};
+                    console.log("new person,",newPersonLoop);
+                    server.to(clientSocket.id).emit('newUserInGameRoom',newPersonLoop);
+                }
             });
         });
     });
