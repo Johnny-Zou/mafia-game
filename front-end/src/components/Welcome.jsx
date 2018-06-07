@@ -59,10 +59,10 @@ class Welcome extends Component {
     			{errorMsg}
     			<div className="container">
   				<div className="row justify-content-center">
-  					<div className="col-2">
+  					<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
 			       		<button type="button" className="btn btn-primary" onClick={this.joinRoom}>Join Room</button>
 			       	</div>
-			       	<div className="col-2">
+			       	<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
 			       		<button type="button" className="btn btn-primary" onClick={this.createRoom}>Create Room</button>
 			       	</div>
 			    </div>

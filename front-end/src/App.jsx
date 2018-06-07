@@ -3,10 +3,10 @@ import io from 'socket.io-client';
 
 import './bootstrap.css';
 
-import Welcome from './components/Welcome.js';
-import JoinGame from './components/JoinGame.js';
-import CreateGame from './components/CreateGame.js';
-import Lobby from './components/Lobby.js';
+import Welcome from './components/Welcome';
+import JoinGame from './components/JoinGame';
+import CreateGame from './components/CreateGame';
+import Lobby from './components/Lobby';
 
 var allowedPages = ["Welcome" , "JoinGame", "CreateGame", "Lobby"];
 

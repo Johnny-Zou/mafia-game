@@ -11,6 +11,8 @@ class Lobby extends Component {
 		this.sendMsg = this.sendMsg.bind(this);
 		this.componentDidMount = this.componentDidMount.bind(this);
 
+		this.handleEnterKeySubmit = this.handleEnterKeySubmit.bind(this);
+
 	  	this.state = {player_list: [],
 	  					chat_log: [],
 	  					current_msg: "",
@@ -45,6 +47,10 @@ class Lobby extends Component {
 		currentMsgList.push(newMessage);
 		this.setState({chat_log: currentMsgList});
 
+		//scroll down
+		var element = document.getElementById("scrollableChat");
+   		element.scrollTop = element.scrollHeight - element.clientHeight;
+
 	}
 
 	_newUserInGameRoom(data){
@@ -56,15 +62,24 @@ class Lobby extends Component {
 
 
 	sendMsg(){
-		const client = this.props.client;
+		if(this.state.current_msg.length > 0){
+			const client = this.props.client;
 
-		var message = {player_name: this.props.player_name, message: this.state.current_msg, game_id: this.props.game_id};
-		client.emit("messageToServer",message);
+			var message = {player_name: this.props.player_name, message: this.state.current_msg, game_id: this.props.game_id};
+			client.emit("messageToServer",message);
 
-		//clear the current msg
-		this.setState({current_msg: ""});
+			//clear the current msg
+			this.setState({current_msg: ""});
+		}
 	}
 
+	handleEnterKeySubmit(e){
+		console.log(e.keyCode);
+		if(e.keyCode == 13){
+			this.sendMsg();
+			e.preventDefault();
+		}
+	}
 
 
 	render() {
@@ -116,12 +131,12 @@ class Lobby extends Component {
 		    			<div className="col-md-6">
 		    				<div className="chatContainer rounded bg-light">
 		    					<div className="chatInnerMsgContainer">
-		    						<div className="chatInnerInnerMsgContainer">
+		    						<div id="scrollableChat" className="chatInnerInnerMsgContainer">
 		    							{messageList}
 		    						</div>
 		    					</div>
 		    					<div className="chatBottom">
-		    						<textarea className="chatTextBox" value={this.state.current_msg} onChange={this.handleCurrentMsgChange} name="msg"></textarea>
+		    						<textarea className="chatTextBox" value={this.state.current_msg} onKeyDown={this.handleEnterKeySubmit} onChange={this.handleCurrentMsgChange} name="msg"></textarea>
 		    						<button type="button" className="chatSubmitTextButton btn btn-info" onClick={this.sendMsg}>Send</button>
 		    					</div>
 		    				</div>
@@ -133,10 +148,10 @@ class Lobby extends Component {
     			
     			<div className="container">
 	  				<div className="row justify-content-center text-center">
-	  					<div className="col-2">
+	  					<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
 				       		<button type="button" className="btn btn-primary" onClick={this.createGame}>Start Game</button>
 				       	</div>
-				       	<div className="col-2">
+				       	<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
 				       		<button type="button" className="btn btn-primary" onClick={this.navigateBack}>Quit</button>
 				       	</div>
 				    </div>
