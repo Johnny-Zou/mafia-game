@@ -47,12 +47,11 @@ class Lobby extends Component {
 	}
 
 	_messageToClient(data){
-		if(!data.initialUpdate){
-			var currentMsgList = this.state.chat_log;
-			var newMessage = {player_name: data.player_name, message: data.message, messageType: "messageToAll"};
-			currentMsgList.push(newMessage);
-			this.setState({chat_log: currentMsgList});
-		}
+		var currentMsgList = this.state.chat_log;
+		var newMessage = {player_name: data.player_name, message: data.message, messageType: "messageToAll"};
+		currentMsgList.push(newMessage);
+		this.setState({chat_log: currentMsgList});
+		
 		//scroll down
 		var element = document.getElementById("scrollableChat");
    		element.scrollTop = element.scrollHeight - element.clientHeight;
@@ -61,12 +60,13 @@ class Lobby extends Component {
 
 	_newUserInGameRoom(data){
 		// chat message to tell people a new user is in the room
-		var currentMsgList = this.state.chat_log;
-		var joinMessage = data.player_name + " has joined the room";
-		var newMessage = {player_name: data.player_name, message: joinMessage, messageType: "serverAnnouncement"};
-		currentMsgList.push(newMessage);
-		this.setState({chat_log: currentMsgList});
-
+		if(!data.initialUpdate){
+			var currentMsgList = this.state.chat_log;
+			var joinMessage = data.player_name + " has joined the room";
+			var newMessage = {player_name: data.player_name, message: joinMessage, messageType: "serverAnnouncement"};
+			currentMsgList.push(newMessage);
+			this.setState({chat_log: currentMsgList});
+		}
 		//Update player list
 		var currentPlayerList = this.state.player_list;
 		currentPlayerList.push(data.player_name);
