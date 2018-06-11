@@ -4,6 +4,7 @@ module.exports = function(server,clientSocket){
     //Add the player to the game room
     clientSocket.on("joinGameRoom", function(data){
         clientSocket.nickname = data.player_name;
+        clientSocket.gameRoom = data.game_id;
 
         //To everyone else in the gameRoom add a new person
         var newPerson = {player_name: data.player_name};
@@ -30,6 +31,13 @@ module.exports = function(server,clientSocket){
     });
 
     clientSocket.on('disconnect',function(data){
+        if("gameRoom" in clientSocket){
+            var player = {player_name: clientSocket.nickname};
+            server.to(clientSocket.gameRoom).emit("playerLeaving",player);
+
+            clientSocket.leave(clientSocket.gameRoom);
+        }
+
         console.log("Client Disconnected");
     });
 

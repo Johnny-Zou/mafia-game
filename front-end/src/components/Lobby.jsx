@@ -9,7 +9,9 @@ class Lobby extends Component {
 	  	this.handleCurrentMsgChange = this.handleCurrentMsgChange.bind(this);
 		this.navigateBack = this.navigateBack.bind(this);
 		this.sendMsg = this.sendMsg.bind(this);
+		this.startGame = this.startGame.bind(this);
 		this.componentDidMount = this.componentDidMount.bind(this);
+
 
 		this.handleEnterKeySubmit = this.handleEnterKeySubmit.bind(this);
 
@@ -82,6 +84,11 @@ class Lobby extends Component {
 			//clear the current msg
 			this.setState({current_msg: ""});
 		}
+	}
+
+	startGame(){
+
+		this.props.onPageChange("GameScreen");	
 	}
 
 	handleEnterKeySubmit(e){
@@ -160,7 +167,7 @@ class Lobby extends Component {
     			<div className="container">
 	  				<div className="row justify-content-center text-center">
 	  					<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
-				       		<button type="button" className="btn btn-primary" onClick={this.createGame}>Start Game</button>
+				       		<button type="button" className="btn btn-primary" onClick={this.startGame}>Start Game</button>
 				       	</div>
 				       	<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
 				       		<button type="button" className="btn btn-primary" onClick={this.navigateBack}>Quit</button>
