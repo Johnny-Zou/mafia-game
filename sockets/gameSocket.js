@@ -16,7 +16,8 @@ module.exports = function(server,clientSocket){
             server.in(data.game_id).clients((err , clients) => {
                 // clients will be array of socket ids , currently available in given room
                 clients.forEach(function(client) {
-                    var newPersonLoop = {player_name: server.of("/").connected[client].nickname, initialUpdate: true};
+                    var initialUpdateValue = server.of("/").connected[client].nickname != clientSocket.nickname;
+                    var newPersonLoop = {player_name: server.of("/").connected[client].nickname, initialUpdate: initialUpdateValue};
                     server.to(clientSocket.id).emit('newUserInGameRoom',newPersonLoop);
                 });
             });
