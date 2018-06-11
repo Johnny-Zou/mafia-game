@@ -69,6 +69,7 @@ class Lobby extends Component {
 		if(indexOfRemovingPlayer > -1){
 			currentPlayerList.splice(indexOfRemovingPlayer,1);
 		}
+		this.setState({player_list: currentPlayerList});
 	}
 
 	sendMsg(){
