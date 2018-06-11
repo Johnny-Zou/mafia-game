@@ -20,13 +20,15 @@ class Lobby extends Component {
 	}
 
 	navigateBack(){
+		const client = this.props.client;
+		// tell the server that the socket is leaving the game room
+		client.emit("leaveGameRoom", {game_id: this.props.game_id, player_name: this.props.player_name});
 		this.props.onPageChange("Welcome");	
 	}
 
 	handleCurrentMsgChange(e){
 		this.setState({current_msg: e.target.value});
 	}
-
 
 	//LifeCycle functions
 	componentDidMount(){
@@ -39,6 +41,7 @@ class Lobby extends Component {
 		// Socket event listeners
 		client.on('messageToClient', this._messageToClient.bind(this));
 		client.on('newUserInGameRoom', this._newUserInGameRoom.bind(this));
+		client.on('playerLeaving', this._playerLeavingGameRoom.bind(this));
 	}
 
 	_messageToClient(data){
@@ -59,7 +62,14 @@ class Lobby extends Component {
 		this.setState({player_list: currentPlayerList});
 	}
 
-
+	_playerLeavingGameRoom(data){
+		var currentPlayerList = this.state.player_list;
+		
+		var indexOfRemovingPlayer = currentPlayerList.indexOf(data.player_name);
+		if(indexOfRemovingPlayer > -1){
+			currentPlayerList.splice(indexOfRemovingPlayer,1);
+		}
+	}
 
 	sendMsg(){
 		if(this.state.current_msg.length > 0){
@@ -91,7 +101,7 @@ class Lobby extends Component {
 		const messageList = this.state.chat_log.map((chatMessage,index) =>
 
 								<div className="newMessage" key={chatMessage.player_name + index}>
-									<a class="font-weight-bold">{chatMessage.player_name}:</a> {chatMessage.message}
+									<a className="font-weight-bold">{chatMessage.player_name}:</a> {chatMessage.message}
 								</div>
 							);
 

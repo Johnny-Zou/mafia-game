@@ -7,12 +7,12 @@ class CreateGame extends Component {
 		this.navigateBack = this.navigateBack.bind(this);
 		this.handleNameInputChange = this.handleNameInputChange.bind(this);
 	  	this.state = {	errorName: false,
-	  					player_name: ""
+	  					game_name: ""
 	  				};
 	}
 
 	handleNameInputChange(e){
-		 this.setState({player_name: e.target.value});
+		 this.setState({game_name: e.target.value});
 
 	}
 
@@ -26,7 +26,7 @@ class CreateGame extends Component {
 
 	render() {
 		const errorMsg = this.state.errorName ? (
-				<p>Error, you must enter a player name</p>
+				<p>Error, you must enter a game room name</p>
 			):(
 				<p></p>
 			);
@@ -35,7 +35,7 @@ class CreateGame extends Component {
 				<h1>Create Game | Mafia - the party game</h1>
 
 				<p>Hey {this.props.player_name}, set up your new game below!</p>
-				<input value={this.state.player_name} onChange={this.handleNameInputChange}type="text" name="playerName"/>
+				<input value={this.state.game_name} onChange={this.handleNameInputChange}type="text" name="gameName"/>
     			<br/>
     			<br/>
     			{errorMsg}

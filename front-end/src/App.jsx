@@ -7,8 +7,9 @@ import Welcome from './components/Welcome';
 import JoinGame from './components/JoinGame';
 import CreateGame from './components/CreateGame';
 import Lobby from './components/Lobby';
+import GameScreen from './components/GameScreen'
 
-var allowedPages = ["Welcome" , "JoinGame", "CreateGame", "Lobby"];
+var allowedPages = ["Welcome" , "JoinGame", "CreateGame", "Lobby", "GameScreen"];
 
 const serverIP = "ec2-18-191-123-240.us-east-2.compute.amazonaws.com:8080";
 
@@ -64,6 +65,10 @@ class App extends Component {
 			case "Lobby":
 				return (
 					<Lobby client = {this.state.client} player_name = {this.state.player_name} game_id = {this.state.game_id} onPageChange = {this.handlePageChange}/>
+				);
+			case "GameScreen":
+				return (
+					<GameScreen client = {this.state.client} />
 				);
 			default:
 				return (
