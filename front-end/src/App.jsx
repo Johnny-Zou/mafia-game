@@ -35,7 +35,6 @@ class App extends Component {
 	}
 
 	handlePageChange(newPage) {
-		console.log(allowedPages.indexOf(toString(newPage)));
 		if(allowedPages.indexOf(newPage) != -1){
 			this.setState({page: newPage});
 		}

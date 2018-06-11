@@ -18,11 +18,9 @@ class Welcome extends Component {
 
 	joinRoom(){
 		if(this.state.player_name === ""){
-			console.log("failed");
 			this.setState({errorName: true});
 		}
 		else{
-			console.log("success");
 			this.props.onNameChange(this.state.player_name);
 			this.props.onPageChange("JoinGame");	
 		}
@@ -31,11 +29,9 @@ class Welcome extends Component {
 
 	createRoom(){
 		if(this.state.player_name === ""){
-			console.log("failed");
 			this.setState({errorName: true});
 		}
 		else{
-			console.log("success");
 			this.props.onNameChange(this.state.player_name);
 			this.props.onPageChange("CreateGame");	
 		}

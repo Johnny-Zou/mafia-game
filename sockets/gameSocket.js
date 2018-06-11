@@ -7,7 +7,7 @@ module.exports = function(server,clientSocket){
         clientSocket.gameRoom = data.game_id;
 
         //To everyone else in the gameRoom add a new person
-        var newPerson = {player_name: data.player_name};
+        var newPerson = {player_name: data.player_name, initialUpdate: false};
         server.to(data.game_id).emit("newUserInGameRoom",newPerson);
 
         clientSocket.join(data.game_id,function(){
@@ -16,7 +16,7 @@ module.exports = function(server,clientSocket){
             server.in(data.game_id).clients((err , clients) => {
                 // clients will be array of socket ids , currently available in given room
                 clients.forEach(function(client) {
-                    var newPersonLoop = {player_name: server.of("/").connected[client].nickname};
+                    var newPersonLoop = {player_name: server.of("/").connected[client].nickname, initialUpdate: true};
                     server.to(clientSocket.id).emit('newUserInGameRoom',newPersonLoop);
                 });
             });

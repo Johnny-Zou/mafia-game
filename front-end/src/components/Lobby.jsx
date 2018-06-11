@@ -47,11 +47,12 @@ class Lobby extends Component {
 	}
 
 	_messageToClient(data){
-		var currentMsgList = this.state.chat_log;
-		var newMessage = {player_name: data.player_name, message: data.message};
-		currentMsgList.push(newMessage);
-		this.setState({chat_log: currentMsgList});
-
+		if(!data.initialUpdate){
+			var currentMsgList = this.state.chat_log;
+			var newMessage = {player_name: data.player_name, message: data.message, messageType: "messageToAll"};
+			currentMsgList.push(newMessage);
+			this.setState({chat_log: currentMsgList});
+		}
 		//scroll down
 		var element = document.getElementById("scrollableChat");
    		element.scrollTop = element.scrollHeight - element.clientHeight;
@@ -59,14 +60,29 @@ class Lobby extends Component {
 	}
 
 	_newUserInGameRoom(data){
+		// chat message to tell people a new user is in the room
+		var currentMsgList = this.state.chat_log;
+		var joinMessage = data.player_name + " has joined the room";
+		var newMessage = {player_name: data.player_name, message: joinMessage, messageType: "serverAnnouncement"};
+		currentMsgList.push(newMessage);
+		this.setState({chat_log: currentMsgList});
+
+		//Update player list
 		var currentPlayerList = this.state.player_list;
 		currentPlayerList.push(data.player_name);
 		this.setState({player_list: currentPlayerList});
 	}
 
 	_playerLeavingGameRoom(data){
+		//Chat message to tell people a user has left the room
+		var currentMsgList = this.state.chat_log;
+		var leaveMessage = data.player_name + " has left the room";
+		var newMessage = {player_name: data.player_name, message: leaveMessage, messageType: "serverAnnouncement"};
+		currentMsgList.push(newMessage);
+		this.setState({chat_log: currentMsgList});
+
+		//Update player list
 		var currentPlayerList = this.state.player_list;
-		
 		var indexOfRemovingPlayer = currentPlayerList.indexOf(data.player_name);
 		if(indexOfRemovingPlayer > -1){
 			currentPlayerList.splice(indexOfRemovingPlayer,1);
@@ -87,8 +103,7 @@ class Lobby extends Component {
 	}
 
 	startGame(){
-
-		this.props.onPageChange("GameScreen");	
+		this.props.onPageChange("GameScreen");
 	}
 
 	handleEnterKeySubmit(e){
@@ -109,7 +124,12 @@ class Lobby extends Component {
 		const messageList = this.state.chat_log.map((chatMessage,index) =>
 
 								<div className="newMessage" key={chatMessage.player_name + index}>
-									<a className="font-weight-bold">{chatMessage.player_name}:</a> {chatMessage.message}
+									{chatMessage.messageType == "messageToAll" &&
+										<div><a className="font-weight-bold">{chatMessage.player_name}:</a> {chatMessage.message}</div>
+									}
+									{chatMessage.messageType == "serverAnnouncement" &&
+										<div><a className="font-weight-light text-muted font-italic">{chatMessage.message} </a></div>
+									}
 								</div>
 							);
 
