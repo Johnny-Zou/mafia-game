@@ -1,0 +1,30 @@
+// GAME COLLECTION
+{
+	"game_id": "game_id",									//all player sockets must join this room
+	"player_num": ,	
+	"game_status": { "game_started": true,
+
+
+
+
+					},									//Left lobby?
+	"player_list": ["player-id1","player-id2"],				//KEY RELATION TO PLAYER
+	"chat_log": [
+					{	"from": "player_id",
+						"to": "player_id",						//player_id for whisper or all and mafia from those groups
+						"msg_type": "chat",						//annoucement,
+						"message": "long msg here",
+					},
+
+
+
+				]
+
+
+}
+
+// Player Collection
+{
+	"player_id": "player_id",											//KEY RELATION TO GAME 
+	""
+}
