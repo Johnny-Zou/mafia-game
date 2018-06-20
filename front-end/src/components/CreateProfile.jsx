@@ -25,13 +25,12 @@ class CreateProfile extends Component {
 			const client = this.props.client;
 			var data = {player_name: this.state.player_name};
 
+			var self = this;
 			client.emit("createProfile",data,function(callbackData){
 				if(callbackData.success == true){
-					this.props.onNameChange(callbackData.player_name);
-					this.props.onPlayerIDChange(callbackData.player_id);
-					console.log("player_name:", callbackData.player_name);
-					console.log("player_id:", callbackData.player_id);
-					this.props.onPageChange("Welcome");	
+					self.props.onNameChange(callbackData.player_name);
+					self.props.onPlayerIDChange(callbackData.player_id);
+					self.props.onPageChange("Welcome");	
 				}
 			});
 		}

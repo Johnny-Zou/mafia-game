@@ -24,7 +24,7 @@ class Welcome extends Component {
 			<div className="text-center">
 				<h1>Welcome Mafia - the party game</h1>
 
-				<p>Hello {this.props.player_name}</p>
+				<h1>Hello <strong> {this.props.player_name}</strong> </h1>
     			<br/>
     			<br/>
     			<div className="container">

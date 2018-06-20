@@ -67,7 +67,18 @@ module.exports = function(server,clientSocket){
     //Game Sockets
     clientSocket.on("createGame",function(data,callback){
         //create game variables
-        var temp_game_id;
+        function makeid() {
+            var text = "";
+            var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+            for (var i = 0; i < 6; i++){
+                text += possible.charAt(Math.floor(Math.random() * possible.length));
+            }
+
+            return text;
+        }
+
+        var temp_game_id = makeid();
         var gameJSON = {
             "game_id": temp_game_id,                         
             "player_num": 1,
@@ -85,7 +96,7 @@ module.exports = function(server,clientSocket){
         db.game.insert(gameJSON);
 
         //Callback function
-        var callbackData = {success: true};
+        var callbackData = {success: true, game_id: temp_game_id};
         callback(callbackData);
     });
 

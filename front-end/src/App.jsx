@@ -24,6 +24,7 @@ class App extends Component {
 		this.handleGameIDChange = this.handleGameIDChange.bind(this);
 		this.handlePageChange = this.handlePageChange.bind(this);
 		this.handleNameChange = this.handleNameChange.bind(this);
+		this.handlePlayerIDChange = this.handlePlayerIDChange.bind(this);
 		this.state = {	page: "CreateProfile",
 						player_name: "",
 						player_id: "",

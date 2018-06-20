@@ -9,7 +9,7 @@ class Lobby extends Component {
 	  	this.handleCurrentMsgChange = this.handleCurrentMsgChange.bind(this);
 		this.navigateBack = this.navigateBack.bind(this);
 		this.sendMsg = this.sendMsg.bind(this);
-		this.startGame = this.startGame.bind(this);
+		this.startGameButton = this.startGameButton.bind(this);
 		this.componentDidMount = this.componentDidMount.bind(this);
 
 
@@ -46,7 +46,6 @@ class Lobby extends Component {
 		client.on('messageToClient', this._messageToClient.bind(this));
 		client.on('newUserInGameRoom', this._newUserInGameRoom.bind(this));
 		client.on('playerLeaving', this._playerLeavingGameRoom.bind(this));
-		client.on('gameIsReady',this.__gameIsReady.bind(this));
 	}
 
 	_messageToClient(data){
@@ -93,9 +92,9 @@ class Lobby extends Component {
 		this.setState({player_list: currentPlayerList});
 	}
 
-	_gameIsReady(){
-		this.props.onPageChange("GameScreen");
-	}
+	// _gameIsReady(){
+	// 	this.props.onPageChange("GameScreen");
+	// }
 
 	sendMsg(){
 		if(this.state.current_msg.length > 0){
@@ -196,7 +195,7 @@ class Lobby extends Component {
     			<div className="container">
 	  				<div className="row justify-content-center text-center">
 	  					<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
-				       		<button type="button" className="btn btn-primary" onClick={this.startGame}>Start Game</button>
+				       		<button type="button" className="btn btn-primary" onClick={this.startGameButton}>Start Game</button>
 				       	</div>
 				       	<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
 				       		<button type="button" className="btn btn-primary" onClick={this.navigateBack}>Quit</button>

@@ -11,10 +11,13 @@ class CreateGame extends Component {
 
 	createGame(){
 		const client = this.props.client;
+
 		var data = {player_name: this.props.player_name};
+		var self = this;
 		client.emit("createGame",data,function(callbackData){
 			if(callbackData.success == true){
-				this.props.onPageChange("Lobby");
+				self.props.onGameIDChange(callbackData.game_id);
+				self.props.onPageChange("Lobby");
 			}
 		});
 	}
