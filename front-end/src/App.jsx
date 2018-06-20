@@ -3,6 +3,7 @@ import io from 'socket.io-client';
 
 import './bootstrap.css';
 
+import CreateProfile from './components/CreateProfile';
 import Welcome from './components/Welcome';
 import JoinGame from './components/JoinGame';
 import CreateGame from './components/CreateGame';
@@ -23,8 +24,9 @@ class App extends Component {
 		this.handleGameIDChange = this.handleGameIDChange.bind(this);
 		this.handlePageChange = this.handlePageChange.bind(this);
 		this.handleNameChange = this.handleNameChange.bind(this);
-		this.state = {	page: "Welcome",
+		this.state = {	page: "CreateProfile",
 						player_name: "",
+						player_id: "",
 						game_id: "",
 						client: socket
 					};
@@ -46,12 +48,21 @@ class App extends Component {
   		}
   	}
 
+  	handlePlayerIDChange(newPlayerID){
+  		if(newPlayerID != ""){
+  			this.setState({player_id: newPlayerID});
+  		}
+  	}
 
 	render() {
 		switch(this.state.page){
+			case "CreateProfile":
+				return(
+					<CreateProfile client = {this.state.client} onPageChange = {this.handlePageChange} onPlayerIDChange = {this.handlePlayerIDChange} onNameChange = {this.handleNameChange} />
+				);
 			case "Welcome":
 				return (
-					<Welcome player_name= {this.state.player_name} onPageChange = {this.handlePageChange} onNameChange = {this.handleNameChange}/>
+					<Welcome player_name= {this.state.player_name} onPageChange = {this.handlePageChange}/>
 				); 
 			case "JoinGame":
 				return (
@@ -59,7 +70,7 @@ class App extends Component {
 				);
 			case "CreateGame":
 				return (
-					<CreateGame player_name = {this.state.player_name} onPageChange = {this.handlePageChange}/>
+					<CreateGame client = {this.state.client} player_name = {this.state.player_name} onGameIDChange = {this.handleGameIDChange} onPageChange = {this.handlePageChange}/>
 				);
 			case "Lobby":
 				return (
@@ -67,11 +78,11 @@ class App extends Component {
 				);
 			case "GameScreen":
 				return (
-					<GameScreen client = {this.state.client} />
+					<GameScreen client = {this.state.client} game_id = {this.state.game_id}/>
 				);
 			default:
 				return (
-					<div> An Error has occured </div>
+					<div> An Error has occured, no page selected</div>
 				);
 		}
 	}

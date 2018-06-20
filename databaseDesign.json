@@ -1,10 +1,11 @@
 // GAME COLLECTION
 {
-	"game_id": "game_id",									//all player sockets must join this room
-	"player_num": ,	
+	"game_id_alias": "game_id",									//all player sockets must join this room
+	"player_num": 6,	
+	"game_admin": "asdasd",
 	"game_status": { "game_started": true,
-
-
+					 "day_counter": 1,
+					 "day": true
 
 
 					},									//Left lobby?
@@ -15,16 +16,14 @@
 						"msg_type": "chat",						//annoucement,
 						"message": "long msg here",
 					},
-
-
-
 				]
 
 
 }
 
+
 // Player Collection
 {
-	"player_id": "player_id",											//KEY RELATION TO GAME 
-	""
+	"_id"
+	"player_name": "billy",
 }

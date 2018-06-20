@@ -5,54 +5,28 @@ class Welcome extends Component {
 	  	super(props);
 		this.joinRoom = this.joinRoom.bind(this);
 		this.createRoom = this.createRoom.bind(this);
-		this.handleNameInputChange = this.handleNameInputChange.bind(this);
-	  	this.state = {	errorName: false,
-	  					player_name: this.props.player_name
+	  	this.state = {	
 	  				};
 	}
 
-	handleNameInputChange(e){
-		 this.setState({player_name: e.target.value});
-
-	}
 
 	joinRoom(){
-		if(this.state.player_name === ""){
-			this.setState({errorName: true});
-		}
-		else{
-			this.props.onNameChange(this.state.player_name);
-			this.props.onPageChange("JoinGame");	
-		}
+		this.props.onPageChange("JoinGame");	
 		
 	}
 
 	createRoom(){
-		if(this.state.player_name === ""){
-			this.setState({errorName: true});
-		}
-		else{
-			this.props.onNameChange(this.state.player_name);
-			this.props.onPageChange("CreateGame");	
-		}
-		
+		this.props.onPageChange("CreateGame");	
 	}
 
 	render() {
-		const errorMsg = this.state.errorName ? (
-				<p>Error, you must enter a player name</p>
-			):(
-				<p></p>
-			);
 		return (
 			<div className="text-center">
 				<h1>Welcome Mafia - the party game</h1>
 
-				<p>Enter your player name: </p>
-				<input value={this.state.player_name} onChange={this.handleNameInputChange}type="text" name="playerName"/>
+				<p>Hello {this.props.player_name}</p>
     			<br/>
     			<br/>
-    			{errorMsg}
     			<div className="container">
   				<div className="row justify-content-center">
   					<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">

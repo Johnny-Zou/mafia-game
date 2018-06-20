@@ -11,6 +11,11 @@ class GameScreen extends Component {
 	  				};
 	}
 
+
+	componentDidMount(){
+		
+	}
+
 	render() {
 		return (
 			<div className="text-center">

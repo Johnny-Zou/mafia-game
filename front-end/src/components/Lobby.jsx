@@ -24,7 +24,8 @@ class Lobby extends Component {
 	navigateBack(){
 		const client = this.props.client;
 		// tell the server that the socket is leaving the game room
-		client.emit("leaveGameRoom", {game_id: this.props.game_id, player_name: this.props.player_name});
+		var data = {game_id: this.props.game_id, player_name: this.props.player_name};
+		client.emit("leaveGameRoom", data);
 		this.props.onPageChange("Welcome");	
 	}
 
@@ -38,12 +39,14 @@ class Lobby extends Component {
 		const client = this.props.client;
 
 		//Join the game room
-		client.emit('joinGameRoom', {game_id: this.props.game_id, player_name: this.props.player_name});
+		var data = {game_id: this.props.game_id, player_name: this.props.player_name};
+		client.emit('joinGameRoom', data);
 
 		// Socket event listeners
 		client.on('messageToClient', this._messageToClient.bind(this));
 		client.on('newUserInGameRoom', this._newUserInGameRoom.bind(this));
 		client.on('playerLeaving', this._playerLeavingGameRoom.bind(this));
+		client.on('gameIsReady',this.__gameIsReady.bind(this));
 	}
 
 	_messageToClient(data){
@@ -90,6 +93,10 @@ class Lobby extends Component {
 		this.setState({player_list: currentPlayerList});
 	}
 
+	_gameIsReady(){
+		this.props.onPageChange("GameScreen");
+	}
+
 	sendMsg(){
 		if(this.state.current_msg.length > 0){
 			const client = this.props.client;
@@ -102,8 +109,10 @@ class Lobby extends Component {
 		}
 	}
 
-	startGame(){
-		this.props.onPageChange("GameScreen");
+	startGameButton(){
+		const client = this.props.client;
+		var data = {game_id: this.props.game_id}
+		client.emit("startGameAdmin", data);
 	}
 
 	handleEnterKeySubmit(e){
@@ -128,7 +137,7 @@ class Lobby extends Component {
 										<div><a className="font-weight-bold">{chatMessage.player_name}:</a> {chatMessage.message}</div>
 									}
 									{chatMessage.messageType == "serverAnnouncement" &&
-										<div><a className="font-weight-light text-muted font-italic">{chatMessage.message} </a></div>
+										<div><a className="font-weight-light text-muted font-italic">{chatMessage.message}</a></div>
 									}
 								</div>
 							);
