@@ -29,6 +29,8 @@ class CreateProfile extends Component {
 				if(callbackData.success == true){
 					this.props.onNameChange(callbackData.player_name);
 					this.props.onPlayerIDChange(callbackData.player_id);
+					console.log("player_name:", callbackData.player_name);
+					console.log("player_id:", callbackData.player_id);
 					this.props.onPageChange("Welcome");	
 				}
 			});

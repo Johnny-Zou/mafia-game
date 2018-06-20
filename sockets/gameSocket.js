@@ -53,9 +53,10 @@ module.exports = function(server,clientSocket){
         db.player.insert(playerJSON,function(err,doc){
             //then call the callback function
             var player_id = doc._id.toString();
+            var player_name = doc.player_name.toString();
 
             //callback function
-            var callbackData = {success: true, player_name: data.player_name, player_id: player_id};
+            var callbackData = {success: true, player_name: player_name, player_id: player_id};
             callback(callbackData);
         });
 
