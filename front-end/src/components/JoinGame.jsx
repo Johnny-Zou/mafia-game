@@ -9,8 +9,10 @@ class JoinGame extends Component {
 	  	this.handleGameIDInputChange = this.handleGameIDInputChange.bind(this);
 	  	this.joinGame = this.joinGame.bind(this);
 	  	this.navigateBack = this.navigateBack.bind(this);
+	  	this.conditionalError = this.conditionalError.bind(this);
 
-	  	this.state = {	errorGame: false,
+	  	this.state = {	error: false,
+	  					errorType: 0,
 	  					game_id: ""
 	  				};
 	}
@@ -20,30 +22,57 @@ class JoinGame extends Component {
 	}
 
 	joinGame(){
-		//Checks
-		// GET REQUEST to see if this.state.game_id exists
-		console.log("get request");
-		$.getJSON("http://" + this.props.serverURL + "/api/game/" + this.state.game_id, function(data) {
-		    console.log(data);
+		//Check if valid game_id entered
+		if(this.state.game_id === ""){
+			this.setState({error: true});
+			this.setState({errorType: 1});
+			return;
+		}
 
-		    console.log("gameid:",data.game_id);
-		});
-		console.log("end");
+		// GET REQUEST to see if game_id exists
+		var self = this;
+		$.getJSON("http://" + this.props.serverURL + "/api/game/" + this.state.game_id)
+			.done(function( json ) {
+				self.setState({error: false});
+				self.setState({errorType: 0});
 
-		this.props.onGameIDChange(this.state.game_id);
-		this.props.onPageChange("Lobby");
+				this.props.onGameIDChange(this.state.game_id);
+		    	this.props.onPageChange("Lobby");
+			})
+			.fail(function( jqxhr, textStatus, error ) {
+				if(jqxhr.status == 400){
+					console.log("Game id" + self.state.game_id + "does not exist");
+					self.setState({error: true});
+					self.setState({errorType: 2});
+				}
+			});
 	}
 
 	navigateBack(){
 		this.props.onPageChange("Welcome");	
 	}
 
+	conditionalError(){
+		if(this.state.error){
+			switch(this.state.errorType){
+				case 0:
+					return <p></p>;
+					break;
+				case 1:
+					return <p>Error, you must enter a game id</p>;
+					break;
+				case 2:
+					return <p>Sorry, that game id doesn't seem to exist</p>;
+					break;
+				default:
+					return <p>Unknown Error</p>;
+			}
+		}
+	}
+
 	render() {
-		const errorMsg = this.state.errorGame ? (
-				<p>Error, you must enter a player name</p>
-			):(
-				<p></p>
-			);
+		const errorMsg = this.conditionalError();
+
 		return (
 			<div className="text-center">
 				<h1>Join Game | Mafia - the party game</h1>

@@ -35,7 +35,7 @@ router.get('/game/:id', function(req, res, next){
         }
         else if(!game){
             console.log("Could not find game");
-            res.status(400);
+            res.status(404);
             res.json({
                 "error": "No game found"
             });
@@ -86,7 +86,7 @@ router.delete('/game/:id', function(req, res, next){
         }
         if(!game){
             console.log("Could not find game");
-            res.status(400);
+            res.status(404);
             res.json({
                 "error": "No game found"
             });
@@ -124,7 +124,7 @@ router.put('/game/:id', function(req, res, next){
             }
             if(!game){
                 console.log("Could not find game");
-                res.status(400);
+                res.status(404);
                 res.json({
                     "error": "No game found"
                 });
