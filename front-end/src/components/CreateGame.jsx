@@ -12,7 +12,7 @@ class CreateGame extends Component {
 	createGame(){
 		const client = this.props.client;
 
-		var data = {player_name: this.props.player_name};
+		var data = {player_id: this.props.player_id};
 		var self = this;
 		client.emit("createGame",data,function(callbackData){
 			if(callbackData.success == true){

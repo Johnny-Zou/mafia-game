@@ -67,11 +67,11 @@ class App extends Component {
 				); 
 			case "JoinGame":
 				return (
-					<JoinGame player_name = {this.state.player_name} onGameIDChange = {this.handleGameIDChange} onPageChange = {this.handlePageChange}/>
+					<JoinGame serverURL = {serverIP} player_id = {this.state.player_id} player_name = {this.state.player_name} onGameIDChange = {this.handleGameIDChange} onPageChange = {this.handlePageChange}/>
 				);
 			case "CreateGame":
 				return (
-					<CreateGame client = {this.state.client} player_name = {this.state.player_name} onGameIDChange = {this.handleGameIDChange} onPageChange = {this.handlePageChange}/>
+					<CreateGame client = {this.state.client} player_id = {this.state.player_id} player_name = {this.state.player_name} onGameIDChange = {this.handleGameIDChange} onPageChange = {this.handlePageChange}/>
 				);
 			case "Lobby":
 				return (

@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import $ from 'jquery';
 
 class JoinGame extends Component {
 	constructor(props) {
@@ -20,7 +21,14 @@ class JoinGame extends Component {
 
 	joinGame(){
 		//Checks
-		// **TODO**
+		// GET REQUEST to see if this.state.game_id exists
+		console.log("get request");
+		$.getJSON("http://" + this.props.serverURL + "/api/game/" + this.state.game_id, function(data) {
+		    console.log(data);
+
+		    console.log("gameid:",data.game_id);
+		});
+		console.log("end");
 
 		this.props.onGameIDChange(this.state.game_id);
 		this.props.onPageChange("Lobby");

@@ -7,6 +7,13 @@ var db = mongojs('mongodb://mafia_admin:bestappever_mafia_admin123@ds145790.mlab
 
 //REST API
 
+//enable CORS
+router.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
 // Get All Games
 router.get('/game', function(req, res, next){
     db.game.find(function(err, gameList){

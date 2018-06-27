@@ -78,7 +78,17 @@ module.exports = function(server,clientSocket){
             return text;
         }
 
-        var temp_game_id = makeid();
+        // Create a Unique 6 character game id
+        var unique = false;
+        var temp_game_id;
+        while(!unique){
+            temp_game_id = makeid();
+
+            //Check for uniqueness TODO CHECK IF THIS WORKS
+            if(db.collection.find({_id: "myId"}, {_id: 1}).count()){
+                unique = true;
+            }
+        }
         var gameJSON = {
             "game_id": temp_game_id,                         
             "player_num": 1,
