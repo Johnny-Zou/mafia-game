@@ -115,7 +115,6 @@ class Lobby extends Component {
 	}
 
 	handleEnterKeySubmit(e){
-		console.log(e.keyCode);
 		if(e.keyCode == 13){
 			this.sendMsg();
 			e.preventDefault();

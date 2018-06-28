@@ -8,7 +8,7 @@ module.exports = function(server,clientSocket){
         clientSocket.gameRoom = data.game_id;
 
         // add the player id into the mongojs database
-        var bulkUpdate = db.game.initializeOrderedBulkOp();
+        var bulkUpdate = db.game.initializeUnorderedBulkOp();
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "player_list": clientSocket.player_id} });
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$inc: {"player_num": 1} });
 
@@ -38,19 +38,19 @@ module.exports = function(server,clientSocket){
         var player = {player_name: data.player_name};
 
         //remove the player from the database game
-        var bulkUpdate = db.game.initializeOrderedBulkOp();
+        var bulkUpdate = db.game.initializeUnorderedBulkOp();
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "player_list": clientSocket.player_id} });
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$inc: {"player_num": -1} });
 
         bulkUpdate.execute(function (err, res) {
-            if(lastErrorObject.n == 1){
+            //if(lastErrorObject.n == 1){
                 console.log("removed" + clientSocket.player_id + "from game room" + data.game_id);
                 server.to(data.game_id).emit("playerLeaving",player);
                 clientSocket.leave(data.game_id);
-            }
-            else{
-                console.log("lastErrorObject: ", lastErrorObject);
-            }
+            //}
+            //else{
+             //   console.log("lastErrorObject: ", lastErrorObject);
+           // }
         });
     });
 
@@ -59,19 +59,19 @@ module.exports = function(server,clientSocket){
             var player = {player_name: clientSocket.nickname};
 
             //remove the player from the database game
-            var bulkUpdate = db.game.initializeOrderedBulkOp();
+            var bulkUpdate = db.game.initializeUnorderedBulkOp();
             bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "player_list": clientSocket.player_id} });
             bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$inc: {"player_num": -1} });
 
             bulkUpdate.execute(function (err, res) {
-                if(lastErrorObject.n == 1){
+                //if(lastErrorObject.n == 1){
                     console.log("removed" + clientSocket.player_id + "from game room" + data.game_id);
                     server.to(data.game_id).emit("playerLeaving",player);
                     clientSocket.leave(data.game_id);
-                }
-                else{
-                    console.log("lastErrorObject: ", lastErrorObject);
-                }
+                //}
+                //else{
+                 //   console.log("lastErrorObject: ", lastErrorObject);
+                //}
             });
 
             server.to(clientSocket.gameRoom).emit("playerLeaving",player);
@@ -122,14 +122,14 @@ module.exports = function(server,clientSocket){
 
         var gameJSON = {
             "game_id": temp_game_id,                         
-            "player_num": 1,
+            "player_num": 0,
             "game_admin": data.player_id,
             "game_status": { "game_started": false,
                              "day_counter": null,
                              "day": null
                             },
 
-            "player_list": [data.player_id],
+            "player_list": [],
             "chat_log": [],
         }
 

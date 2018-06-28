@@ -8,15 +8,16 @@ module.exports = function(server,clientSocket){
 
 		var newMessageForClient = {player_name: data.player_name, message: data.message};
 		var mongoChatObject = {	"from": clientSocket.nickname,
-								"from_id": clientSocket.gameRoom,
+								"from_id": clientSocket.player_id,
 								"to": "all",						//player_id for whisper or all and mafia from those groups
 								"msg_type": "annoucement",						//annoucement,
 								"message": data.message,
 							  };
-		db.game.update(
-            {"game_id": clientSocket.gameRoom},
-            { $push: { "chat_log": mongoChatObject} },
-            function(err,doc,lastErrorObject){
+
+		db.game.findAndModify({
+			query: {"game_id": clientSocket.gameRoom},
+            update: { $push: { "chat_log": mongoChatObject} }
+		}, function(err,doc,lastErrorObject){
                console.log("pushed " + lastErrorObject.n + " chat messages!");
                server.to(data.game_id).emit("messageToClient",newMessageForClient);
             }
