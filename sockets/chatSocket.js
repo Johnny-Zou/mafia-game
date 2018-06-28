@@ -13,7 +13,7 @@ module.exports = function(server,clientSocket){
 								"msg_type": "annoucement",						//annoucement,
 								"message": data.message,
 							  };
-		db.game.updateMany(
+		db.game.update(
             {"game_id": clientSocket.gameRoom},
             { $push: { "chat_log": mongoChatObject} },
             function(err,doc,lastErrorObject){

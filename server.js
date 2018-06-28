@@ -28,8 +28,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 // Routes
-app.use('/', game);
 app.use('/api', api);
+app.use('/', game);
+
 
 var server = app.listen(port,function(){
     console.log("Server started on port " + port);

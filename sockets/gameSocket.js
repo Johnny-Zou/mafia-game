@@ -8,20 +8,13 @@ module.exports = function(server,clientSocket){
         clientSocket.gameRoom = data.game_id;
 
         // add the player id into the mongojs database
-        db.game.updateMany(
-            {"game_id": clientSocket.gameRoom},
-            [{ $push: { "player_list": clientSocket.player_id} }, {$inc: {"player_num": 1} }],
-            function(err,doc,lastErrorObject){
-                console.log("added " + clientSocket.player_id +" to" + clientSocket.gameRoom);
-                // if(lastErrorObject.n == 1){
-                //     console.log("removed" + clientSocket.player_id + "from game room" + data.game_id);
-                //     server.to(data.game_id).emit("playerLeaving",player);
-                //     clientSocket.leave(data.game_id);
-                // }
-                // else{
-                //     console.log("lastErrorObject: ", lastErrorObject);
-                // }
-        });
+        var bulkUpdate = db.game.initializeOrderedBulkOp();
+        bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "player_list": clientSocket.player_id} });
+        bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$inc: {"player_num": 1} });
+
+        bulk.execute(function (err, res) {
+            console.log("added " + clientSocket.player_id +" to" + clientSocket.gameRoom);
+        })
 
         //To everyone else in the gameRoom add a new person
         var newPerson = {player_name: data.player_name, initialUpdate: false};
@@ -45,10 +38,32 @@ module.exports = function(server,clientSocket){
         var player = {player_name: data.player_name};
 
         //remove the player from the database game
-        db.game.updateMany(
-            {"game_id": clientSocket.gameRoom},
-            [{ $pull: { "player_list": clientSocket.player_id} }, {$inc: {"player_num": -1} }],
-            function(err,doc,lastErrorObject){
+        var bulkUpdate = db.game.initializeOrderedBulkOp();
+        bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "player_list": clientSocket.player_id} });
+        bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$inc: {"player_num": -1} });
+
+        bulk.execute(function (err, res) {
+            if(lastErrorObject.n == 1){
+                console.log("removed" + clientSocket.player_id + "from game room" + data.game_id);
+                server.to(data.game_id).emit("playerLeaving",player);
+                clientSocket.leave(data.game_id);
+            }
+            else{
+                console.log("lastErrorObject: ", lastErrorObject);
+            }
+        });
+    });
+
+    clientSocket.on('disconnect',function(data){
+        if("gameRoom" in clientSocket){
+            var player = {player_name: clientSocket.nickname};
+
+            //remove the player from the database game
+            var bulkUpdate = db.game.initializeOrderedBulkOp();
+            bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "player_list": clientSocket.player_id} });
+            bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$inc: {"player_num": -1} });
+
+            bulk.execute(function (err, res) {
                 if(lastErrorObject.n == 1){
                     console.log("removed" + clientSocket.player_id + "from game room" + data.game_id);
                     server.to(data.game_id).emit("playerLeaving",player);
@@ -57,29 +72,7 @@ module.exports = function(server,clientSocket){
                 else{
                     console.log("lastErrorObject: ", lastErrorObject);
                 }
-            }
-        );
-    });
-
-    clientSocket.on('disconnect',function(data){
-        if("gameRoom" in clientSocket){
-            var player = {player_name: clientSocket.nickname};
-
-            // remove the player from the database game
-            db.game.updateMany(
-                {"game_id": clientSocket.gameRoom},
-                [{ $pull: { "player_list": clientSocket.player_id} }, {$inc: {"player_num": -1} }],
-                function(err,doc,lastErrorObject){
-                    if(lastErrorObject.n == 1){
-                        console.log("removed" + clientSocket.player_id + "from game room" + data.game_id);
-                        server.to(data.game_id).emit("playerLeaving",player);
-                        clientSocket.leave(data.game_id);
-                    }
-                    else{
-                        console.log("lastErrorObject: ", lastErrorObject);
-                    }
-                }
-            );
+            });
 
             server.to(clientSocket.gameRoom).emit("playerLeaving",player);
 
