@@ -107,10 +107,7 @@ module.exports = function(server,clientSocket){
             var callbackData = {success: true, player_name: player_name, player_id: player_id};
             callback(callbackData);
         });
-
-
-        
-    })
+    });
 
     //Game Sockets
     clientSocket.on("createGame",function(data,callback){

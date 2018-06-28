@@ -1,5 +1,5 @@
 var mongojs = require('mongojs');
-var db = mongojs('mongodb://mafia_admin:bestappever_mafia_admin123@ds145790.mlab.com:45790/mafia_db',['game']);
+var db = mongojs('mongodb://mafia_admin:bestappever_mafia_admin123@ds145790.mlab.com:45790/mafia_db',['game','player']);
 
 module.exports = function(server,clientSocket){
 
@@ -12,7 +12,7 @@ module.exports = function(server,clientSocket){
 								"to": "all",						//player_id for whisper or all and mafia from those groups
 								"msg_type": "annoucement",						//annoucement,
 								"message": data.message,
-							  },
+							  };
 		db.game.updateMany(
             {"game_id": clientSocket.gameRoom},
             { $push: { "chat_log": mongoChatObject} },
