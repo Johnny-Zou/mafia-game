@@ -12,7 +12,7 @@ module.exports = function(server,clientSocket){
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "player_list": clientSocket.player_id} });
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$inc: {"player_num": 1} });
 
-        bulk.execute(function (err, res) {
+        bulkUpdate.execute(function (err, res) {
             console.log("added " + clientSocket.player_id +" to" + clientSocket.gameRoom);
         })
 
@@ -42,7 +42,7 @@ module.exports = function(server,clientSocket){
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "player_list": clientSocket.player_id} });
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$inc: {"player_num": -1} });
 
-        bulk.execute(function (err, res) {
+        bulkUpdate.execute(function (err, res) {
             if(lastErrorObject.n == 1){
                 console.log("removed" + clientSocket.player_id + "from game room" + data.game_id);
                 server.to(data.game_id).emit("playerLeaving",player);
@@ -63,7 +63,7 @@ module.exports = function(server,clientSocket){
             bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "player_list": clientSocket.player_id} });
             bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$inc: {"player_num": -1} });
 
-            bulk.execute(function (err, res) {
+            bulkUpdate.execute(function (err, res) {
                 if(lastErrorObject.n == 1){
                     console.log("removed" + clientSocket.player_id + "from game room" + data.game_id);
                     server.to(data.game_id).emit("playerLeaving",player);
