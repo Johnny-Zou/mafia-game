@@ -1,5 +1,5 @@
 var mongojs = require('mongojs');
-var db = mongojs('mongodb://mafia_admin:bestappever_mafia_admin123@ds145790.mlab.com:45790/mafia_db',['game']);
+var db = mongojs('mongodb://mafia_admin:bestappever_mafia_admin123@ds145790.mlab.com:45790/mafia_db',['game','player']);
 
 module.exports = function(server,clientSocket){
     //Add the player to the game room
@@ -116,24 +116,17 @@ module.exports = function(server,clientSocket){
             var text = "";
             var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-            for (var i = 0; i < 6; i++){
+            for (var i = 0; i < 7; i++){
                 text += possible.charAt(Math.floor(Math.random() * possible.length));
             }
 
             return text;
         }
 
-        // Create a Unique 6 character game id
-        var unique = false;
-        var temp_game_id;
-        while(!unique){
-            temp_game_id = makeid();
+        // Create a Unique 7 character game id
+            //TODO MAKE THIS PROMISE AND UNIQUE
+        temp_game_id = makeid();
 
-            //Check for uniqueness TODO CHECK IF THIS WORKS
-            if(db.collection.find({_id: "myId"}, {_id: 1}).count()){
-                unique = true;
-            }
-        }
         var gameJSON = {
             "game_id": temp_game_id,                         
             "player_num": 1,
