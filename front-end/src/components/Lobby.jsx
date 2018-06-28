@@ -92,9 +92,9 @@ class Lobby extends Component {
 		this.setState({player_list: currentPlayerList});
 	}
 
-	// _gameIsReady(){
-	// 	this.props.onPageChange("GameScreen");
-	// }
+	_gameIsReady(){
+		this.props.onPageChange("GameScreen");
+	}
 
 	sendMsg(){
 		if(this.state.current_msg.length > 0){

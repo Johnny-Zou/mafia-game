@@ -7,6 +7,22 @@ module.exports = function(server,clientSocket){
         clientSocket.nickname = data.player_name;
         clientSocket.gameRoom = data.game_id;
 
+        // add the player id into the mongojs database
+        db.game.updateMany(
+            {"game_id": clientSocket.gameRoom},
+            [{ $push: { "player_list": clientSocket.player_id} }, {$inc: {"player_num": 1} }],
+            function(err,doc,lastErrorObject){
+                console.log("added " + clientSocket.player_id +" to" + clientSocket.gameRoom);
+                // if(lastErrorObject.n == 1){
+                //     console.log("removed" + clientSocket.player_id + "from game room" + data.game_id);
+                //     server.to(data.game_id).emit("playerLeaving",player);
+                //     clientSocket.leave(data.game_id);
+                // }
+                // else{
+                //     console.log("lastErrorObject: ", lastErrorObject);
+                // }
+        });
+
         //To everyone else in the gameRoom add a new person
         var newPerson = {player_name: data.player_name, initialUpdate: false};
         server.to(data.game_id).emit("newUserInGameRoom",newPerson);
@@ -27,14 +43,44 @@ module.exports = function(server,clientSocket){
 
     clientSocket.on("leaveGameRoom",function(data){
         var player = {player_name: data.player_name};
-        server.to(data.game_id).emit("playerLeaving",player);
 
-        clientSocket.leave(data.game_id);
+        //remove the player from the database game
+        db.game.updateMany(
+            {"game_id": clientSocket.gameRoom},
+            [{ $pull: { "player_list": clientSocket.player_id} }, {$inc: {"player_num": -1} }],
+            function(err,doc,lastErrorObject){
+                if(lastErrorObject.n == 1){
+                    console.log("removed" + clientSocket.player_id + "from game room" + data.game_id);
+                    server.to(data.game_id).emit("playerLeaving",player);
+                    clientSocket.leave(data.game_id);
+                }
+                else{
+                    console.log("lastErrorObject: ", lastErrorObject);
+                }
+            }
+        );
     });
 
     clientSocket.on('disconnect',function(data){
         if("gameRoom" in clientSocket){
             var player = {player_name: clientSocket.nickname};
+
+            // remove the player from the database game
+            db.game.updateMany(
+                {"game_id": clientSocket.gameRoom},
+                [{ $pull: { "player_list": clientSocket.player_id} }, {$inc: {"player_num": -1} }],
+                function(err,doc,lastErrorObject){
+                    if(lastErrorObject.n == 1){
+                        console.log("removed" + clientSocket.player_id + "from game room" + data.game_id);
+                        server.to(data.game_id).emit("playerLeaving",player);
+                        clientSocket.leave(data.game_id);
+                    }
+                    else{
+                        console.log("lastErrorObject: ", lastErrorObject);
+                    }
+                }
+            );
+
             server.to(clientSocket.gameRoom).emit("playerLeaving",player);
 
             clientSocket.leave(clientSocket.gameRoom);
@@ -54,6 +100,8 @@ module.exports = function(server,clientSocket){
             //then call the callback function
             var player_id = doc._id.toString();
             var player_name = doc.player_name.toString();
+
+            clientSocket.player_id = player_id;
 
             //callback function
             var callbackData = {success: true, player_name: player_name, player_id: player_id};
@@ -110,6 +158,7 @@ module.exports = function(server,clientSocket){
         callback(callbackData);
     });
 
+    // Note: cannot use callback here as it is going to multiple clients
     clientSocket.on("startGameAdmin",function(data){
         //Write to database all the players as well as game state
         // db.game.findOne({"game_id": data.game_id}, function(err, game){
