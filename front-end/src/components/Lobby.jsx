@@ -42,6 +42,10 @@ class Lobby extends Component {
 			.done(function( json ) {
 				console.log("current chat log:", json.chat_log);
 				self.setState({chat_log: json.chat_log});
+
+				//scroll down
+				var element = document.getElementById("scrollableChat");
+		   		element.scrollTop = element.scrollHeight - element.clientHeight;
 			})
 			.fail(function( jqxhr, textStatus, error ) {
 				if(jqxhr.status == 400){
@@ -61,7 +65,7 @@ class Lobby extends Component {
 
 	_messageToClient(data){
 		var currentMsgList = this.state.chat_log;
-		var newMessage = {player_name: data.player_name, message: data.message, msg_type: "chat", messageTo: "all"};
+		var newMessage = {from: data.player_name, message: data.message, msg_type: "chat", messageTo: "all"};
 		currentMsgList.push(newMessage);
 		this.setState({chat_log: currentMsgList});
 		
@@ -141,9 +145,9 @@ class Lobby extends Component {
 							);
 		const messageList = this.state.chat_log.map((chatMessage,index) =>
 
-								<div className="newMessage" key={chatMessage.player_name + index}>
+								<div className="newMessage" key={chatMessage.from_id + index}>
 									{chatMessage.msg_type == "chat" &&
-										<div><a className="font-weight-bold">{chatMessage.player_name}:</a> {chatMessage.message}</div>
+										<div><a className="font-weight-bold">{chatMessage.from}:</a> {chatMessage.message}</div>
 									}
 									{chatMessage.msg_type == "annoucement" &&
 										<div><a className="font-weight-light text-muted font-italic">{chatMessage.message}</a></div>

@@ -36,8 +36,8 @@ class JoinGame extends Component {
 				self.setState({error: false});
 				self.setState({errorType: 0});
 
-				this.props.onGameIDChange(this.state.game_id);
-		    	this.props.onPageChange("Lobby");
+				self.props.onGameIDChange(self.state.game_id);
+		    	self.props.onPageChange("Lobby");
 			})
 			.fail(function( jqxhr, textStatus, error ) {
 				if(jqxhr.status == 400){

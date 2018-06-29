@@ -15,7 +15,7 @@ module.exports = function(server,clientSocket){
                                 "from_id": "server",
                                 "to": "all",                        //player_id for whisper or all and mafia from those groups
                                 "msg_type": "annoucement",                      //annoucement,
-                                "message": data.player_name + " has joined the room",
+                                "message": clientSocket.player_name + " has joined the room",
                               };
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "chat_log": newJoinAnnoucement}});
 
@@ -52,7 +52,7 @@ module.exports = function(server,clientSocket){
                                     "from_id": "server",
                                     "to": "all",                        //player_id for whisper or all and mafia from those groups
                                     "msg_type": "annoucement",                      //annoucement,
-                                    "message": data.player_name + " has left the room",
+                                    "message": clientSocket.player_name + " has left the room",
                                  };
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "chat_log": newLeaveAnnoucement}})
 
@@ -80,7 +80,7 @@ module.exports = function(server,clientSocket){
                                     "from_id": "server",
                                     "to": "all",                        //player_id for whisper or all and mafia from those groups
                                     "msg_type": "annoucement",                      //annoucement,
-                                    "message": data.player_name + " has left the room",
+                                    "message": clientSocket.nickname + " has left the room",
                                   };
             bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "chat_log": newLeaveAnnoucement}})
 
