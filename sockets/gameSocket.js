@@ -24,7 +24,7 @@ module.exports = function(server,clientSocket){
         })
 
         //To everyone else in the gameRoom add a new person
-        var newPerson = {player_name: data.player_name, initialUpdate: false};
+        var newPerson = {player_name: data.player_name};
         server.to(data.game_id).emit("newUserInGameRoom",newPerson);
 
         clientSocket.join(data.game_id,function(){
@@ -33,11 +33,12 @@ module.exports = function(server,clientSocket){
             server.in(data.game_id).clients((err , clients) => {
                 // clients will be array of socket ids , currently available in given room
                 clients.forEach(function(client) {
-                    var initialUpdateValue = server.of("/").connected[client].nickname != clientSocket.nickname;
-                    var newPersonLoop = {player_name: server.of("/").connected[client].nickname, initialUpdate: initialUpdateValue};
+                    // var initialUpdateValue = server.of("/").connected[client].nickname != clientSocket.nickname;
+                    var newPersonLoop = {player_name: server.of("/").connected[client].nickname};
                     server.to(clientSocket.id).emit('newUserInGameRoom',newPersonLoop);
                 });
             });
+            server.to(data.game_id).emit("messageToClient",newJoinAnnoucement);
         });
     });
 
@@ -60,6 +61,7 @@ module.exports = function(server,clientSocket){
             //if(lastErrorObject.n == 1){
                 console.log("removed" + clientSocket.nickname + "from game room" + data.game_id);
                 server.to(data.game_id).emit("playerLeaving",player);
+                server.to(data.game_id).emit("messageToClient",newLeaveAnnoucement);
                 clientSocket.leave(data.game_id);
             //}
             //else{
@@ -88,6 +90,7 @@ module.exports = function(server,clientSocket){
                 //if(lastErrorObject.n == 1){
                     console.log("removed" + clientSocket.nickname + "from game room" + data.game_id);
                     server.to(data.game_id).emit("playerLeaving",player);
+                    server.to(data.game_id).emit("messageToClient",newLeaveAnnoucement);
                     clientSocket.leave(data.game_id);
                 //}
                 //else{

@@ -65,7 +65,7 @@ class Lobby extends Component {
 
 	_messageToClient(data){
 		var currentMsgList = this.state.chat_log;
-		var newMessage = {from: data.player_name, message: data.message, msg_type: "chat", messageTo: "all"};
+		var newMessage = {from: data.from, message: data.message, msg_type: "chat", messageTo: "all"};
 		currentMsgList.push(newMessage);
 		this.setState({chat_log: currentMsgList});
 		
@@ -77,26 +77,30 @@ class Lobby extends Component {
 
 	_newUserInGameRoom(data){
 		// chat message to tell people a new user is in the room
-		if(!data.initialUpdate){
-			var currentMsgList = this.state.chat_log;
-			var joinMessage = data.player_name + " has joined the room";
-			var newMessage = {player_name: data.player_name, message: joinMessage, msg_type: "annoucement", messageTo: "all"};
-			currentMsgList.push(newMessage);
-			this.setState({chat_log: currentMsgList});
-		}
+		// if(!data.initialUpdate){
+		// 	var currentMsgList = this.state.chat_log;
+		// 	var joinMessage = data.player_name + " has joined the room";
+		// 	var newMessage = {player_name: data.player_name, message: joinMessage, msg_type: "annoucement", messageTo: "all"};
+		// 	currentMsgList.push(newMessage);
+		// 	this.setState({chat_log: currentMsgList});
+		// }
 		//Update player list
 		var currentPlayerList = this.state.player_list;
 		currentPlayerList.push(data.player_name);
 		this.setState({player_list: currentPlayerList});
+
+		//scroll down
+		// var element = document.getElementById("scrollableChat");
+   		// element.scrollTop = element.scrollHeight - element.clientHeight;
 	}
 
 	_playerLeavingGameRoom(data){
-		//Chat message to tell people a user has left the room
-		var currentMsgList = this.state.chat_log;
-		var leaveMessage = data.player_name + " has left the room";
-		var newMessage = {player_name: data.player_name, message: leaveMessage, msg_type: "annoucement", messageTo: "all"};
-		currentMsgList.push(newMessage);
-		this.setState({chat_log: currentMsgList});
+		// //Chat message to tell people a user has left the room
+		// var currentMsgList = this.state.chat_log;
+		// var leaveMessage = data.player_name + " has left the room";
+		// var newMessage = {player_name: data.player_name, message: leaveMessage, msg_type: "annoucement", messageTo: "all"};
+		// currentMsgList.push(newMessage);
+		// this.setState({chat_log: currentMsgList});
 
 		//Update player list
 		var currentPlayerList = this.state.player_list;
@@ -105,6 +109,10 @@ class Lobby extends Component {
 			currentPlayerList.splice(indexOfRemovingPlayer,1);
 		}
 		this.setState({player_list: currentPlayerList});
+
+		//scroll down
+		// var element = document.getElementById("scrollableChat");
+  //  		element.scrollTop = element.scrollHeight - element.clientHeight;
 	}
 
 	_gameIsReady(){
