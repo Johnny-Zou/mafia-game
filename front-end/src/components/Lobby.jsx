@@ -65,7 +65,7 @@ class Lobby extends Component {
 
 	_messageToClient(data){
 		var currentMsgList = this.state.chat_log;
-		var newMessage = {from: data.from, message: data.message, msg_type: "chat", messageTo: "all"};
+		var newMessage = {from: data.from, message: data.message, msg_type: data.msg_type, messageTo: data.to};
 		currentMsgList.push(newMessage);
 		this.setState({chat_log: currentMsgList});
 		

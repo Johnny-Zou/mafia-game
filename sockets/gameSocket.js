@@ -55,13 +55,14 @@ module.exports = function(server,clientSocket){
                                     "msg_type": "annoucement",                      //annoucement,
                                     "message": clientSocket.nickname + " has left the room",
                                  };
+        server.to(data.game_id).emit("messageToClient",newLeaveAnnoucement);
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "chat_log": newLeaveAnnoucement}})
 
         bulkUpdate.execute(function (err, res) {
             //if(lastErrorObject.n == 1){
                 console.log("removed" + clientSocket.nickname + "from game room" + data.game_id);
                 server.to(data.game_id).emit("playerLeaving",player);
-                server.to(data.game_id).emit("messageToClient",newLeaveAnnoucement);
+                
                 clientSocket.leave(data.game_id);
             //}
             //else{
@@ -84,23 +85,19 @@ module.exports = function(server,clientSocket){
                                     "msg_type": "annoucement",                      //annoucement,
                                     "message": clientSocket.nickname + " has left the room",
                                   };
+            server.to(data.game_id).emit("messageToClient",newLeaveAnnoucement);
             bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "chat_log": newLeaveAnnoucement}})
 
             bulkUpdate.execute(function (err, res) {
                 //if(lastErrorObject.n == 1){
                     console.log("removed" + clientSocket.nickname + "from game room" + data.game_id);
                     server.to(data.game_id).emit("playerLeaving",player);
-                    server.to(data.game_id).emit("messageToClient",newLeaveAnnoucement);
                     clientSocket.leave(data.game_id);
                 //}
                 //else{
                  //   console.log("lastErrorObject: ", lastErrorObject);
                 //}
             });
-
-            server.to(clientSocket.gameRoom).emit("playerLeaving",player);
-
-            clientSocket.leave(clientSocket.gameRoom);
         }
 
         console.log("Client Disconnected");
