@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import $ from 'jquery';
 
 import '../chat.css';
 
@@ -11,8 +12,6 @@ class Lobby extends Component {
 		this.sendMsg = this.sendMsg.bind(this);
 		this.startGameButton = this.startGameButton.bind(this);
 		this.componentDidMount = this.componentDidMount.bind(this);
-
-
 		this.handleEnterKeySubmit = this.handleEnterKeySubmit.bind(this);
 
 	  	this.state = {player_list: [],
@@ -35,8 +34,20 @@ class Lobby extends Component {
 
 	//LifeCycle functions
 	componentDidMount(){
-		
 		const client = this.props.client;
+
+		//get request to fetch the current chat log
+		var self = this;
+		$.getJSON("http://" + this.props.serverURL + "/api/game/" + this.props.game_id)
+			.done(function( json ) {
+				console.log("current chat log:", json.chat_log);
+				self.setState({chat_log: json.chat_log});
+			})
+			.fail(function( jqxhr, textStatus, error ) {
+				if(jqxhr.status == 400){
+					console.log("Game id" + self.state.game_id + "does not exist");
+				}
+			});
 
 		//Join the game room
 		var data = {game_id: this.props.game_id, player_name: this.props.player_name};
@@ -50,7 +61,7 @@ class Lobby extends Component {
 
 	_messageToClient(data){
 		var currentMsgList = this.state.chat_log;
-		var newMessage = {player_name: data.player_name, message: data.message, messageType: "messageToAll"};
+		var newMessage = {player_name: data.player_name, message: data.message, msg_type: "chat", messageTo: "all"};
 		currentMsgList.push(newMessage);
 		this.setState({chat_log: currentMsgList});
 		
@@ -65,7 +76,7 @@ class Lobby extends Component {
 		if(!data.initialUpdate){
 			var currentMsgList = this.state.chat_log;
 			var joinMessage = data.player_name + " has joined the room";
-			var newMessage = {player_name: data.player_name, message: joinMessage, messageType: "serverAnnouncement"};
+			var newMessage = {player_name: data.player_name, message: joinMessage, msg_type: "annoucement", messageTo: "all"};
 			currentMsgList.push(newMessage);
 			this.setState({chat_log: currentMsgList});
 		}
@@ -79,7 +90,7 @@ class Lobby extends Component {
 		//Chat message to tell people a user has left the room
 		var currentMsgList = this.state.chat_log;
 		var leaveMessage = data.player_name + " has left the room";
-		var newMessage = {player_name: data.player_name, message: leaveMessage, messageType: "serverAnnouncement"};
+		var newMessage = {player_name: data.player_name, message: leaveMessage, msg_type: "annoucement", messageTo: "all"};
 		currentMsgList.push(newMessage);
 		this.setState({chat_log: currentMsgList});
 
@@ -100,7 +111,7 @@ class Lobby extends Component {
 		if(this.state.current_msg.length > 0){
 			const client = this.props.client;
 
-			var message = {player_name: this.props.player_name, message: this.state.current_msg, game_id: this.props.game_id};
+			var message = {player_name: this.props.player_name, message: this.state.current_msg, game_id: this.props.game_id, msg_type: "chat", messageTo: "all"};
 			client.emit("messageToServer",message);
 
 			//clear the current msg
@@ -131,10 +142,10 @@ class Lobby extends Component {
 		const messageList = this.state.chat_log.map((chatMessage,index) =>
 
 								<div className="newMessage" key={chatMessage.player_name + index}>
-									{chatMessage.messageType == "messageToAll" &&
+									{chatMessage.msg_type == "chat" &&
 										<div><a className="font-weight-bold">{chatMessage.player_name}:</a> {chatMessage.message}</div>
 									}
-									{chatMessage.messageType == "serverAnnouncement" &&
+									{chatMessage.msg_type == "annoucement" &&
 										<div><a className="font-weight-light text-muted font-italic">{chatMessage.message}</a></div>
 									}
 								</div>

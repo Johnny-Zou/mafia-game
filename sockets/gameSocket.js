@@ -11,6 +11,13 @@ module.exports = function(server,clientSocket){
         var bulkUpdate = db.game.initializeUnorderedBulkOp();
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "player_list": clientSocket.player_id} });
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$inc: {"player_num": 1} });
+        var newJoinAnnoucement = {  "from": "server",
+                                "from_id": "server",
+                                "to": "all",                        //player_id for whisper or all and mafia from those groups
+                                "msg_type": "annoucement",                      //annoucement,
+                                "message": data.player_name + " has joined the room",
+                              };
+        bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "chat_log": newJoinAnnoucement}});
 
         bulkUpdate.execute(function (err, res) {
             console.log("added " + clientSocket.player_id +" to" + clientSocket.gameRoom);
@@ -41,6 +48,13 @@ module.exports = function(server,clientSocket){
         var bulkUpdate = db.game.initializeUnorderedBulkOp();
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "player_list": clientSocket.player_id} });
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$inc: {"player_num": -1} });
+        var newLeaveAnnoucement = {  "from": "server",
+                                    "from_id": "server",
+                                    "to": "all",                        //player_id for whisper or all and mafia from those groups
+                                    "msg_type": "annoucement",                      //annoucement,
+                                    "message": data.player_name + " has left the room",
+                                 };
+        bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "chat_log": newLeaveAnnoucement}})
 
         bulkUpdate.execute(function (err, res) {
             //if(lastErrorObject.n == 1){
@@ -62,6 +76,13 @@ module.exports = function(server,clientSocket){
             var bulkUpdate = db.game.initializeUnorderedBulkOp();
             bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "player_list": clientSocket.player_id} });
             bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$inc: {"player_num": -1} });
+            var newLeaveAnnoucement = {  "from": "server",
+                                    "from_id": "server",
+                                    "to": "all",                        //player_id for whisper or all and mafia from those groups
+                                    "msg_type": "annoucement",                      //annoucement,
+                                    "message": data.player_name + " has left the room",
+                                  };
+            bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "chat_log": newLeaveAnnoucement}})
 
             bulkUpdate.execute(function (err, res) {
                 //if(lastErrorObject.n == 1){

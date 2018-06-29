@@ -10,7 +10,7 @@ module.exports = function(server,clientSocket){
 		var mongoChatObject = {	"from": clientSocket.nickname,
 								"from_id": clientSocket.player_id,
 								"to": "all",						//player_id for whisper or all and mafia from those groups
-								"msg_type": "annoucement",						//annoucement,
+								"msg_type": "chat",						//annoucement,
 								"message": data.message,
 							  };
 

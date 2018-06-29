@@ -75,7 +75,7 @@ class App extends Component {
 				);
 			case "Lobby":
 				return (
-					<Lobby client = {this.state.client} player_name = {this.state.player_name} game_id = {this.state.game_id} onPageChange = {this.handlePageChange}/>
+					<Lobby serverURL = {serverIP} client = {this.state.client} player_name = {this.state.player_name} game_id = {this.state.game_id} onPageChange = {this.handlePageChange}/>
 				);
 			case "GameScreen":
 				return (
