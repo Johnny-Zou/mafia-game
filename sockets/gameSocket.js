@@ -15,7 +15,7 @@ module.exports = function(server,clientSocket){
                                 "from_id": "server",
                                 "to": "all",                        //player_id for whisper or all and mafia from those groups
                                 "msg_type": "annoucement",                      //annoucement,
-                                "message": clientSocket.player_name + " has joined the room",
+                                "message": clientSocket.nickname + " has joined the room",
                               };
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "chat_log": newJoinAnnoucement}});
 
@@ -52,13 +52,13 @@ module.exports = function(server,clientSocket){
                                     "from_id": "server",
                                     "to": "all",                        //player_id for whisper or all and mafia from those groups
                                     "msg_type": "annoucement",                      //annoucement,
-                                    "message": clientSocket.player_name + " has left the room",
+                                    "message": clientSocket.nickname + " has left the room",
                                  };
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "chat_log": newLeaveAnnoucement}})
 
         bulkUpdate.execute(function (err, res) {
             //if(lastErrorObject.n == 1){
-                console.log("removed" + clientSocket.player_id + "from game room" + data.game_id);
+                console.log("removed" + clientSocket.nickname + "from game room" + data.game_id);
                 server.to(data.game_id).emit("playerLeaving",player);
                 clientSocket.leave(data.game_id);
             //}
@@ -86,7 +86,7 @@ module.exports = function(server,clientSocket){
 
             bulkUpdate.execute(function (err, res) {
                 //if(lastErrorObject.n == 1){
-                    console.log("removed" + clientSocket.player_id + "from game room" + data.game_id);
+                    console.log("removed" + clientSocket.nickname + "from game room" + data.game_id);
                     server.to(data.game_id).emit("playerLeaving",player);
                     clientSocket.leave(data.game_id);
                 //}
