@@ -188,21 +188,24 @@ module.exports = function(server,clientSocket){
     // Note: cannot use callback here as it is going to multiple clients
     clientSocket.on("startGameAdmin",function(data){
         //confirm that the client emitting is the admin of the game room
-        db.game.findOne({"game_id": clientSocket.gameRoom},function(err,game){
-            var player_num = game.player_num;
-            var detectiveNum = parseInt(game.game_status.gameRoles[0].amount);
-            var mafiaNum = parseInt(game.game_status.gameRoles[1].amount);
-            var guardianAngelNum = parseInt(game.game_status.gameRoles[2].amount);
-            var townsPeopleNum = game.game_status.gameRoles[3].amount; //usually "fill"
+        db.game.findOne({"game_id": clientSocket.gameRoom},function(err,doc){
+            console.log(doc);
+            console.log(doc.player_num);
+            console.log(doc.game_status.gameRoles[0]);
+            var player_num = doc.player_num;
+            var detectiveNum = parseInt(doc.game_status.gameRoles[0].amount);
+            var mafiaNum = parseInt(doc.game_status.gameRoles[1].amount);
+            var guardianAngelNum = parseInt(doc.game_status.gameRoles[2].amount);
+            var townsPeopleNum = doc.game_status.gameRoles[3].amount; //usually "fill"
 
             var minNum = detectiveNum + mafiaNum + guardianAngelNum;
 
-            if(game.game_admin == clientSocket.player_id && player_num >= minNum){
+            if(doc.game_admin == clientSocket.player_id && player_num >= minNum){
 
-                var player_list = game.player_list;
+                var player_list = doc.player_list;
                 shuffle(player_list);
 
-                for(var i = 0; i <= game.player_num; i++){
+                for(var i = 0; i <= doc.player_num; i++){
                     var bulkUpdate = db.player.initializeUnorderedBulkOp();
                     var playerRole = "townsPeople";
                     if(detectiveNum > 0){
@@ -215,9 +218,9 @@ module.exports = function(server,clientSocket){
                         playerRole = "guardianAngel";
                     }
 
-                    bulkUpdate.find( {"_id": game.player_list[i] }).update( {$set: { "inGame": true} } );
-                    bulkUpdate.find( {"_id": game.player_list[i] }).update( {$set: { "isAlive": true} } );
-                    bulkUpdate.find( {"_id": game.player_list[i] }).update( {$set: { "role": playerRole} } );
+                    bulkUpdate.find( {"_id": mongojs.ObjectId(doc.player_list[i]) }).update( {$set: { "inGame": true} } );
+                    bulkUpdate.find( {"_id": mongojs.ObjectId(doc.player_list[i]) }).update( {$set: { "isAlive": true} } );
+                    bulkUpdate.find( {"_id": mongojs.ObjectId(doc.player_list[i]) }).update( {$set: { "role": playerRole} } );
 
                     bulkUpdate.execute(function(err,res){
                         // Tell all the clients that the data is ready
