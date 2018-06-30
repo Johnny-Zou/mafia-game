@@ -48,7 +48,7 @@ router.get('/game/:id', function(req, res, next){
 
 // Get Single player
 router.get('/player/:id', function(req, res, next){
-    db.player.findOne({"_id": toString(req.params.id)}, function(err, player){
+    db.player.findOne({"_id": mongojs.ObjectId(req.params.id)}, function(err, player){
         if(err){
             console.log("GET request to /player/id: ERROR-",err);
             res.send(err);
