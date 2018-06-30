@@ -56,7 +56,7 @@ module.exports = function(server,clientSocket){
 
         //remove the player from the database game
         var bulkUpdate = db.game.initializeUnorderedBulkOp();
-        bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "player_list": clientSocket.player_id} });
+        bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$pull: { "player_list": clientSocket.player_id} });
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$inc: {"player_num": -1} });
         var newLeaveAnnoucement = {  "from": "server",
                                     "from_id": "server",
@@ -85,7 +85,7 @@ module.exports = function(server,clientSocket){
 
             //remove the player from the database game
             var bulkUpdate = db.game.initializeUnorderedBulkOp();
-            bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "player_list": clientSocket.player_id} });
+            bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$pull: { "player_list": clientSocket.player_id} });
             bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$inc: {"player_num": -1} });
             var newLeaveAnnoucement = {  "from": "server",
                                     "from_id": "server",
@@ -189,9 +189,6 @@ module.exports = function(server,clientSocket){
     clientSocket.on("startGameAdmin",function(data){
         //confirm that the client emitting is the admin of the game room
         db.game.findOne({"game_id": clientSocket.gameRoom},function(err,doc){
-            console.log(doc);
-            console.log(doc.player_num);
-            console.log(doc.game_status.gameRoles[0]);
             var player_num = doc.player_num;
             var detectiveNum = parseInt(doc.game_status.gameRoles[0].amount);
             var mafiaNum = parseInt(doc.game_status.gameRoles[1].amount);
@@ -210,12 +207,15 @@ module.exports = function(server,clientSocket){
                     var playerRole = "townsPeople";
                     if(detectiveNum > 0){
                         playerRole = "detective";
+                        detectiveNum -= 1;
                     }
                     else if(mafiaNum > 0){
                         playerRole = "mafia";
+                        mafiaNum -= 1;
                     }
                     else if(guardianAngelNum > 0){
                         playerRole = "guardianAngel";
+                        guardianAngelNum -= 1;
                     }
 
                     bulkUpdate.find( {"_id": mongojs.ObjectId(doc.player_list[i]) }).update( {$set: { "inGame": true} } );

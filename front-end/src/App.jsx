@@ -79,7 +79,7 @@ class App extends Component {
 				);
 			case "GameScreen":
 				return (
-					<GameScreen client = {this.state.client} game_id = {this.state.game_id}/>
+					<GameScreen serverURL = {serverIP} player_id = {this.state.player_id} client = {this.state.client} game_id = {this.state.game_id}/>
 				);
 			default:
 				return (
