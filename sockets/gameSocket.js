@@ -42,8 +42,8 @@ module.exports = function(server,clientSocket){
         });
     });
 
-    clientSocket.on("leaveGameRoom",function(data){
-        var player = {player_name: data.player_name};
+    clientSocket.on("leaveGameRoom",function(){
+        var player = {player_name: clientSocket.nickname};
 
         //remove the player from the database game
         var bulkUpdate = db.game.initializeUnorderedBulkOp();
@@ -55,15 +55,14 @@ module.exports = function(server,clientSocket){
                                     "msg_type": "annoucement",                      //annoucement,
                                     "message": clientSocket.nickname + " has left the room",
                                  };
-        server.to(data.game_id).emit("messageToClient",newLeaveAnnoucement);
+        server.to(clientSocket.gameRoom).emit("messageToClient",newLeaveAnnoucement);
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "chat_log": newLeaveAnnoucement}})
 
         bulkUpdate.execute(function (err, res) {
             //if(lastErrorObject.n == 1){
-                console.log("removed" + clientSocket.nickname + "from game room" + data.game_id);
-                server.to(data.game_id).emit("playerLeaving",player);
-                
-                clientSocket.leave(data.game_id);
+                console.log("removed" + clientSocket.nickname + "from game room" + clientSocket.gameRoom);
+                server.to(clientSocket.gameRoom).emit("playerLeaving",player);
+                clientSocket.leave(clientSocket.gameRoom);
             //}
             //else{
              //   console.log("lastErrorObject: ", lastErrorObject);
@@ -71,7 +70,7 @@ module.exports = function(server,clientSocket){
         });
     });
 
-    clientSocket.on('disconnect',function(data){
+    clientSocket.on('disconnect',function(){
         if("gameRoom" in clientSocket){
             var player = {player_name: clientSocket.nickname};
 
@@ -85,14 +84,14 @@ module.exports = function(server,clientSocket){
                                     "msg_type": "annoucement",                      //annoucement,
                                     "message": clientSocket.nickname + " has left the room",
                                   };
-            server.to(data.game_id).emit("messageToClient",newLeaveAnnoucement);
+            server.to(clientSocket.gameRoom).emit("messageToClient",newLeaveAnnoucement);
             bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "chat_log": newLeaveAnnoucement}})
 
             bulkUpdate.execute(function (err, res) {
                 //if(lastErrorObject.n == 1){
-                    console.log("removed" + clientSocket.nickname + "from game room" + data.game_id);
-                    server.to(data.game_id).emit("playerLeaving",player);
-                    clientSocket.leave(data.game_id);
+                    console.log("removed" + clientSocket.nickname + "from game room" + clientSocket.gameRoom);
+                    server.to(clientSocket.gameRoom).emit("playerLeaving",player);
+                    clientSocket.leave(clientSocket.gameRoom);
                 //}
                 //else{
                  //   console.log("lastErrorObject: ", lastErrorObject);

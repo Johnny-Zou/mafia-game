@@ -23,8 +23,7 @@ class Lobby extends Component {
 	navigateBack(){
 		const client = this.props.client;
 		// tell the server that the socket is leaving the game room
-		var data = {game_id: this.props.game_id, player_name: this.props.player_name};
-		client.emit("leaveGameRoom", data);
+		client.emit("leaveGameRoom");
 		this.props.onPageChange("Welcome");	
 	}
 
