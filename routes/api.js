@@ -3,7 +3,7 @@ var mongojs = require('mongojs');
 
 var router = express.Router();
 
-var db = mongojs('mongodb://mafia_admin:bestappever_mafia_admin123@ds145790.mlab.com:45790/mafia_db',['game']);
+var db = mongojs('mongodb://mafia_admin:bestappever_mafia_admin123@ds145790.mlab.com:45790/mafia_db',['game','player']);
 
 //REST API
 
@@ -45,6 +45,30 @@ router.get('/game/:id', function(req, res, next){
         res.json(game);
     });
 });
+
+// Get Single player
+router.get('/player/:id', function(req, res, next){
+    db.player.findOne({"_id": req.params.id}, function(err, player){
+        if(err){
+            console.log("GET request to /player/id: ERROR-",err);
+            res.send(err);
+        }
+        else if(!player){
+            console.log("Could not find player");
+            res.status(404);
+            res.json({
+                "error": "No player found"
+            });
+            return;
+        }
+        console.log("GET request to /player/id: SUCCESS,",player);
+        res.json(player);
+    });
+});
+
+
+
+
 
 // Create a new game
 router.post('/game', function(req, res, next){

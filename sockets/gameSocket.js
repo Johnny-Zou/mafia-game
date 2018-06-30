@@ -189,7 +189,7 @@ module.exports = function(server,clientSocket){
     clientSocket.on("startGameAdmin",function(data){
         //confirm that the client emitting is the admin of the game room
         db.game.findOne({"game_id": clientSocket.gameRoom},function(err,game){
-            var player_num = parseInt(game.player_num);
+            var player_num = game.player_num;
             var detectiveNum = parseInt(game.game_status.gameRoles[0].amount);
             var mafiaNum = parseInt(game.game_status.gameRoles[1].amount);
             var guardianAngelNum = parseInt(game.game_status.gameRoles[2].amount);
