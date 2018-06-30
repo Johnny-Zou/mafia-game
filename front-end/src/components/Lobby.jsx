@@ -71,7 +71,6 @@ class Lobby extends Component {
 		//scroll down
 		var element = document.getElementById("scrollableChat");
    		element.scrollTop = element.scrollHeight - element.clientHeight;
-
 	}
 
 	_newUserInGameRoom(data){
@@ -161,7 +160,6 @@ class Lobby extends Component {
 									}
 								</div>
 							);
-
 
 		return (
 			<div>

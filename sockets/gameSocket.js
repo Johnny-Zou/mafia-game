@@ -1,6 +1,15 @@
 var mongojs = require('mongojs');
 var db = mongojs('mongodb://mafia_admin:bestappever_mafia_admin123@ds145790.mlab.com:45790/mafia_db',['game','player']);
 
+//shuffle algorithm
+function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
 module.exports = function(server,clientSocket){
     //Add the player to the game room
     clientSocket.on("joinGameRoom", function(data){
@@ -106,6 +115,9 @@ module.exports = function(server,clientSocket){
         //create the player variable
         var playerJSON = {
                 "player_name": data.player_name,
+                "inGame": false,
+                "isAlive": true,
+                "role": "",
             }
 
         //insert into the database
@@ -146,9 +158,21 @@ module.exports = function(server,clientSocket){
             "game_admin": data.player_id,
             "game_status": { "game_started": false,
                              "day_counter": null,
-                             "day": null
+                             "day": null,
+                             "gameRoles": [ {   "type": "detective",
+                                                "amount": data.detectiveNum,
+                                            },
+                                            {   "type": "mafia",
+                                                "amount": data.mafiaNum,
+                                            },
+                                            {   "type": "guardianAngel",
+                                                "amount": data.guardianAngelNum,
+                                            },
+                                            {   "type": "townsPeople",
+                                                "amount": data.townsPeopleNum,
+                                            }
+                                           ]
                             },
-
             "player_list": [],
             "chat_log": [],
         }
@@ -163,14 +187,48 @@ module.exports = function(server,clientSocket){
 
     // Note: cannot use callback here as it is going to multiple clients
     clientSocket.on("startGameAdmin",function(data){
-        //Write to database all the players as well as game state
-        // db.game.findOne({"game_id": data.game_id}, function(err, game){
+        //confirm that the client emitting is the admin of the game room
+        db.game.findOne({"game_id": clientSocket.gameRoom},function(err,game){
+            var player_num = parseInt(game.player_num);
+            var detectiveNum = parseInt(game.game_status.gameRoles[0].amount);
+            var mafiaNum = parseInt(game.game_status.gameRoles[1].amount);
+            var guardianAngelNum = parseInt(game.game_status.gameRoles[2].amount);
+            var townsPeopleNum = game.game_status.gameRoles[3].amount; //usually "fill"
 
-        // }
+            var minNum = detectiveNum + mafiaNum + guardianAngelNum;
 
+            if(game.game_admin == clientSocket.player_id && player_num >= minNum){
 
+                var player_list = game.player_list;
+                shuffle(player_list);
 
-        server.to(data.game_id).emit("gameIsReady");
+                for(var i = 0; i <= game.player_num; i++){
+                    var bulkUpdate = db.player.initializeUnorderedBulkOp();
+                    var playerRole = "townsPeople";
+                    if(detectiveNum > 0){
+                        playerRole = "detective";
+                    }
+                    else if(mafiaNum > 0){
+                        playerRole = "mafia";
+                    }
+                    else if(guardianAngelNum > 0){
+                        playerRole = "guardianAngel";
+                    }
+
+                    bulkUpdate.find( {"_id": game.player_list[i] }).update( {$set: { "inGame": true} } );
+                    bulkUpdate.find( {"_id": game.player_list[i] }).update( {$set: { "isAlive": true} } );
+                    bulkUpdate.find( {"_id": game.player_list[i] }).update( {$set: { "role": playerRole} } );
+
+                    bulkUpdate.execute(function(err,res){
+                        // Tell all the clients that the data is ready
+                        server.to(clientSocket.gameRoom).emit("gameIsReady");
+                    });
+                }
+            }
+            else{
+                console.log("player does not have permission to start the game");
+            }
+        });
     })
 
 };

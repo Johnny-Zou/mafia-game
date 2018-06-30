@@ -40,7 +40,7 @@ class JoinGame extends Component {
 		    	self.props.onPageChange("Lobby");
 			})
 			.fail(function( jqxhr, textStatus, error ) {
-				if(jqxhr.status == 400){
+				if(jqxhr.status == 404){
 					console.log("Game id" + self.state.game_id + "does not exist");
 					self.setState({error: true});
 					self.setState({errorType: 2});
