@@ -402,6 +402,7 @@ module.exports = function(server,clientSocket){
     function checkDoneAction(){
         db.game.findOne({"game_id": clientSocket.gameRoom},function(err,doc){
             var done = true;
+            var playerArray = doc.player_list;
             playerArray.forEach(function(player){
                 if(player.finishedAction === false){
                     done = false;
