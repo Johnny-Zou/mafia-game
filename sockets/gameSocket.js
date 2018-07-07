@@ -158,7 +158,7 @@ module.exports = function(server,clientSocket){
             "game_admin": data.player_id,
             "game_status": { "game_started": false,
                              "day_counter": null,
-                             "day": null,
+                             "isDay": null,
                              "gameRoles": [ {   "type": "detective",
                                                 "amount": data.detectiveNum,
                                             },
@@ -219,9 +219,9 @@ module.exports = function(server,clientSocket){
                         guardianAngelNum -= 1;
                     }
 
-                    playerBulkUpdate.find( {"_id": mongojs.ObjectId( toString(player_list[i].player_id) ) }).update( {$set: { "inGame": true} } );
-                    playerBulkUpdate.find( {"_id": mongojs.ObjectId( toString(player_list[i].player_id) ) }).update( {$set: { "isAlive": true} } );
-                    playerBulkUpdate.find( {"_id": mongojs.ObjectId( toString(player_list[i].player_id) ) }).update( {$set: { "role": playerRole} } );
+                    playerBulkUpdate.find( {"_id": mongojs.ObjectId( player_list[i].player_id ) }).update( {$set: { "inGame": true} } );
+                    playerBulkUpdate.find( {"_id": mongojs.ObjectId( player_list[i].player_id ) }).update( {$set: { "isAlive": true} } );
+                    playerBulkUpdate.find( {"_id": mongojs.ObjectId( player_list[i].player_id ) }).update( {$set: { "role": playerRole} } );
 
                     playerBulkUpdate.execute(function(err,res){
                         // Tell all the clients that the data is ready
@@ -230,11 +230,11 @@ module.exports = function(server,clientSocket){
                 }
 
                  //update the game doc
-                function prepareGameDate(){
+                function prepareGameData(){
                     var gameBulkUpdate = db.game.initializeUnorderedBulkOp();
-                    gameBulkUpdate.find( {"game_id": clientSocket.gameRoom }).update( {$set: { "inGame": true} } );
-                    gameBulkUpdate.find( {"game_id": clientSocket.gameRoom }).update( {$set: { "isAlive": true} } );
-                    gameBulkUpdate.find( {"game_id": clientSocket.gameRoom }).update( {$set: { "role": playerRole} } );
+                    gameBulkUpdate.find( {"game_id": clientSocket.gameRoom }).update( {$set: { "game_status.game_started": true} } );
+                    gameBulkUpdate.find( {"game_id": clientSocket.gameRoom }).update( {$set: { "game_status.day_counter": 1} } );
+                    gameBulkUpdate.find( {"game_id": clientSocket.gameRoom }).update( {$set: { "game_status.isDay": false} } );
 
                     gameBulkUpdate.execute(function(err,res){
                         // Tell all the clients that the data is ready
