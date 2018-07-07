@@ -203,7 +203,7 @@ module.exports = function(server,clientSocket){
                 var player_list = doc.player_list;
                 shuffle(player_list);
                 var playerBulkUpdate = db.player.initializeUnorderedBulkOp();
-                
+
                 for(var i = 0; i < doc.player_num; i++){
                     var playerRole = "townsPeople";
                     if(detectiveNum > 0){
@@ -244,6 +244,27 @@ module.exports = function(server,clientSocket){
 
                 function preparePrivateGameData(){
                     var gamePrivateBulkUpdate = db.gamePrivate.initializeUnorderedBulkOp();
+                    var playerStatusArray = [];
+
+                    doc.player_list.forEach(function(player){
+                        var newPlayer = {   "player_id": player.player_id,
+                                            "player_name": player.player_name,
+                                            "lynchVotes": 0,
+                                            "mafiaVotes": 0,
+                                            "protectedByGuardian": false,
+                                            "isAlive": true,
+
+                                        };
+                        playerStatusArray.push(newPlayer);
+                    })
+
+
+                    var newPrivateGameJSON = {  
+                                                "game_id": clientSocket.gameRoom,                         
+                                                "game_history": [],
+                                                "player_status": playerStatusArray
+                                            };
+                                            
                     gamePrivateBulkUpdate.insert(newPrivateGameJSON);
 
                     gamePrivateBulkUpdate.execute(function(err,res){
