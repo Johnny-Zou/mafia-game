@@ -257,7 +257,7 @@ module.exports = function(server,clientSocket){
                 console.log("player does not have permission to start the game");
             }
         });
-    })
+    });
 
     // In game socket
     clientSocket.on("submitLynchAction",function(data){
