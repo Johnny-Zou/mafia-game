@@ -61,9 +61,10 @@ class GameScreen extends Component {
 	}
 
 	savePlayerSelect(){
+		var self = this;
 		$.each(this.state.game.player_list, function(i, v) {
-		    if (v.player_id == this.state.new_player_select_id) {
-		        this.setState({"player_select_id": this.state.new_player_select_id, "player_select_name": v.player_name});
+		    if (v.player_id == self.state.new_player_select_id) {
+		        self.setState({"player_select_id": self.state.new_player_select_id, "player_select_name": v.player_name});
 		    }
 		    else{
 		    	console.log("error, cannot find player select name");
