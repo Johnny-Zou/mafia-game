@@ -202,9 +202,9 @@ module.exports = function(server,clientSocket){
                 // Update the player doc
                 var player_list = doc.player_list;
                 shuffle(player_list);
-
-                for(var i = 0; i <= doc.player_num; i++){
-                    var playerBulkUpdate = db.player.initializeUnorderedBulkOp();
+                var playerBulkUpdate = db.player.initializeUnorderedBulkOp();
+                
+                for(var i = 0; i < doc.player_num; i++){
                     var playerRole = "townsPeople";
                     if(detectiveNum > 0){
                         playerRole = "detective";
@@ -222,12 +222,12 @@ module.exports = function(server,clientSocket){
                     playerBulkUpdate.find( {"_id": mongojs.ObjectId( player_list[i].player_id ) }).update( {$set: { "inGame": true} } );
                     playerBulkUpdate.find( {"_id": mongojs.ObjectId( player_list[i].player_id ) }).update( {$set: { "isAlive": true} } );
                     playerBulkUpdate.find( {"_id": mongojs.ObjectId( player_list[i].player_id ) }).update( {$set: { "role": playerRole} } );
-
-                    playerBulkUpdate.execute(function(err,res){
-                        // Tell all the clients that the data is ready
-                        prepareGameData();
-                    });
                 }
+
+                playerBulkUpdate.execute(function(err,res){
+                    // Tell all the clients that the data is ready
+                    prepareGameData();
+                });
 
                  //update the game doc
                 function prepareGameData(){
