@@ -10,7 +10,7 @@ import CreateGame from './components/CreateGame';
 import Lobby from './components/Lobby';
 import GameScreen from './components/GameScreen'
 
-var allowedPages = ["Welcome" , "JoinGame", "CreateGame", "Lobby", "GameScreen"];
+var allowedPages = ["CreateProfile", "Welcome" , "JoinGame", "CreateGame", "Lobby", "GameScreen"];
 
 const serverIP = "ec2-18-191-123-240.us-east-2.compute.amazonaws.com:8080";
 
@@ -25,7 +25,7 @@ class App extends Component {
 		this.handlePageChange = this.handlePageChange.bind(this);
 		this.handleNameChange = this.handleNameChange.bind(this);
 		this.handlePlayerIDChange = this.handlePlayerIDChange.bind(this);
-		this.state = {	page: "Welcome",
+		this.state = {	page: "CreateProfile",
 						player_name: "",
 						player_id: "",
 						game_id: "",
