@@ -3,14 +3,12 @@ import $ from 'jquery';
 
 import '../chat.css';
 
-class Lobby extends Component {
+class ChatFeatures extends Component {
 	constructor(props) {
 	  	super(props);
 
 	  	this.handleCurrentMsgChange = this.handleCurrentMsgChange.bind(this);
-		this.navigateBack = this.navigateBack.bind(this);
 		this.sendMsg = this.sendMsg.bind(this);
-		this.startGameButton = this.startGameButton.bind(this);
 		this.componentDidMount = this.componentDidMount.bind(this);
 		this.handleEnterKeySubmit = this.handleEnterKeySubmit.bind(this);
 
@@ -18,13 +16,6 @@ class Lobby extends Component {
 	  					chat_log: [],
 	  					current_msg: "",
 	  				};
-	}
-
-	navigateBack(){
-		const client = this.props.client;
-		// tell the server that the socket is leaving the game room
-		client.emit("leaveGameRoom");
-		this.props.onPageChange("Welcome");	
 	}
 
 	handleCurrentMsgChange(e){
@@ -52,15 +43,9 @@ class Lobby extends Component {
 				}
 			});
 
-		//Join the game room
-		var data = {game_id: this.props.game_id, player_name: this.props.player_name};
-		client.emit('joinGameRoom', data);
-
 		// Socket event listeners
 		client.on('messageToClient', this._messageToClient.bind(this));
-		client.on('newUserInGameRoom', this._newUserInGameRoom.bind(this));
 		client.on('playerLeaving', this._playerLeavingGameRoom.bind(this));
-		client.on('gameIsReady', this._gameIsReady.bind(this));
 	}
 
 	_messageToClient(data){
@@ -72,25 +57,6 @@ class Lobby extends Component {
 		//scroll down
 		var element = document.getElementById("scrollableChat");
    		element.scrollTop = element.scrollHeight - element.clientHeight;
-	}
-
-	_newUserInGameRoom(data){
-		// chat message to tell people a new user is in the room
-		// if(!data.initialUpdate){
-		// 	var currentMsgList = this.state.chat_log;
-		// 	var joinMessage = data.player_name + " has joined the room";
-		// 	var newMessage = {player_name: data.player_name, message: joinMessage, msg_type: "annoucement", messageTo: "all"};
-		// 	currentMsgList.push(newMessage);
-		// 	this.setState({chat_log: currentMsgList});
-		// }
-		//Update player list
-		var currentPlayerList = this.state.player_list;
-		currentPlayerList.push(data.player_name);
-		this.setState({player_list: currentPlayerList});
-
-		//scroll down
-		// var element = document.getElementById("scrollableChat");
-   		// element.scrollTop = element.scrollHeight - element.clientHeight;
 	}
 
 	_playerLeavingGameRoom(data){
@@ -114,10 +80,6 @@ class Lobby extends Component {
   //  		element.scrollTop = element.scrollHeight - element.clientHeight;
 	}
 
-	_gameIsReady(){
-		this.props.onPageChange("GameScreen");
-	}
-
 	sendMsg(){
 		if(this.state.current_msg.length > 0){
 			const client = this.props.client;
@@ -128,12 +90,6 @@ class Lobby extends Component {
 			//clear the current msg
 			this.setState({current_msg: ""});
 		}
-	}
-
-	startGameButton(){
-		const client = this.props.client;
-		var data = {game_id: this.props.game_id}
-		client.emit("startGameAdmin", data);
 	}
 
 	handleEnterKeySubmit(e){
@@ -164,21 +120,6 @@ class Lobby extends Component {
 
 		return (
 			<div>
-				<div className="text-center">
-					<h1>Game Lobby | Mafia - the party game</h1>
-
-					<p>Hey {this.props.player_name}, Welcome to your game lobby </p>
-
-					<div className ="container">
-						<div className="card bg-primary text-white">
-							<div className="card-body">Game ID: {this.props.game_id}</div>
-						</div>
-					</div>
-
-				</div>
-    			<br/>
-    			<br/>
-
     			<div className="container">
     				<div className="row">
     					<div className="col-md-6">
@@ -209,25 +150,9 @@ class Lobby extends Component {
 		    			</div>
 	    			</div>
 	    		</div>
-	    		<br/>
-	    		<br/>
-    			
-    			<div className="container">
-	  				<div className="row justify-content-center text-center">
-	  					<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
-				       		<button type="button" className="btn btn-primary" onClick={this.startGameButton}>Start Game</button>
-				       	</div>
-				       	<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
-				       		<button type="button" className="btn btn-primary" onClick={this.navigateBack}>Quit</button>
-				       	</div>
-				    </div>
-				    </div>
-		       		<br/>
-		        
-		       		<p id="errorMsg"></p>
 			</div>
 		);
 	}
 }
 
-export default Lobby;
+export default ChatFeatures;

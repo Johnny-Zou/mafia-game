@@ -22,7 +22,18 @@
 					 				},
 					 		]
 					},									//Left lobby?
-	"player_list": ["player-id1","player-id2"],				//KEY RELATION TO PLAYER
+	"player_list": [{	"player_id": "player-id1",
+						"player_name": "player's name",
+						"finishedAction": false,
+						"isAlive": true,
+					},
+					{	"player_id": "player-id2",
+						"player_name": "player's name",
+						"finishedAction": false,
+						"isAlive": true,
+					},
+
+					],				//KEY RELATION TO PLAYER
 	"chat_log": [
 					{	"from": "player_id",
 						"to": "player_id",						//player_id for whisper or all and mafia from those groups
@@ -34,6 +45,42 @@
 
 }
 
+// gamePrivate collection
+{
+	"game_id": "game_id",
+	"game_history": [ 
+						{	"isDay": false,
+							"num_day": 1,
+							"status": 	[
+											{	"affected_player_ID": "4124124",
+												"affect": "investigated"
+											},
+											{	"affected_player_ID": "4124124",
+												"affect": "protected"
+											},
+											{	"affected_player_ID": "4124124",
+												"affect": "killed"
+											},
+										]
+						}
+					],
+	"player_status":[	
+						{	"player_id": "player-id1",
+							"player_name": "player's name",
+							"lynchVotes": 1,
+							"mafiaVotes": 1,
+							"protectedByGuardian": false,
+							"isAlive": true,
+						},
+						{	"player_id": "player-id2",
+							"player_name": "player's name",
+							"protectedByGuardian": false,
+							"lynchVotes": 1,
+							"isAlive": true,
+						},
+					],	
+}
+
 
 // Player Collection
 	//contains private information about the role of each player
@@ -41,7 +88,17 @@
 	"_id" //DEFAULT MONGO
 	"player_name": "billy",
 	"inGame": false,
-	"isAlive": true,
-	"role": "",
-
+	"role": "",																				
+	"actionArray": ["pendingDeath","gaurdianSaved"],
 }
+
+
+
+
+
+
+
+
+
+//USE https://docs.mongodb.com/manual/reference/operator/update/positional/
+// https://docs.mongodb.com/manual/reference/operator/update/positional/

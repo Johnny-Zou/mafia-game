@@ -18,7 +18,7 @@ module.exports = function(server,clientSocket){
 
         // add the player id into the mongojs database
         var bulkUpdate = db.game.initializeUnorderedBulkOp();
-        bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "player_list": clientSocket.player_id} });
+        bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "player_list": {"player_id": clientSocket.player_id, "player_name:" clientSocket.nickname} } });
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$inc: {"player_num": 1} });
         var newJoinAnnoucement = {  "from": "server",
                                 "from_id": "server",
@@ -56,7 +56,7 @@ module.exports = function(server,clientSocket){
 
         //remove the player from the database game
         var bulkUpdate = db.game.initializeUnorderedBulkOp();
-        bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$pull: { "player_list": clientSocket.player_id} });
+        bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$pull: { "player_list": {"player_id": clientSocket.player_id} } });
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$inc: {"player_num": -1} });
         var newLeaveAnnoucement = {  "from": "server",
                                     "from_id": "server",
@@ -85,7 +85,7 @@ module.exports = function(server,clientSocket){
 
             //remove the player from the database game
             var bulkUpdate = db.game.initializeUnorderedBulkOp();
-            bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$pull: { "player_list": clientSocket.player_id} });
+            bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$pull: { "player_list": {"player_id": clientSocket.player_id} } });
             bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$inc: {"player_num": -1} });
             var newLeaveAnnoucement = {  "from": "server",
                                     "from_id": "server",
@@ -199,11 +199,12 @@ module.exports = function(server,clientSocket){
 
             if(doc.game_admin == clientSocket.player_id && player_num >= minNum){
 
+                // Update the player doc
                 var player_list = doc.player_list;
                 shuffle(player_list);
 
                 for(var i = 0; i <= doc.player_num; i++){
-                    var bulkUpdate = db.player.initializeUnorderedBulkOp();
+                    var playerBulkUpdate = db.player.initializeUnorderedBulkOp();
                     var playerRole = "townsPeople";
                     if(detectiveNum > 0){
                         playerRole = "detective";
@@ -218,14 +219,38 @@ module.exports = function(server,clientSocket){
                         guardianAngelNum -= 1;
                     }
 
-                    bulkUpdate.find( {"_id": mongojs.ObjectId(doc.player_list[i]) }).update( {$set: { "inGame": true} } );
-                    bulkUpdate.find( {"_id": mongojs.ObjectId(doc.player_list[i]) }).update( {$set: { "isAlive": true} } );
-                    bulkUpdate.find( {"_id": mongojs.ObjectId(doc.player_list[i]) }).update( {$set: { "role": playerRole} } );
+                    playerBulkUpdate.find( {"_id": mongojs.ObjectId(doc.player_list[i]) }).update( {$set: { "inGame": true} } );
+                    playerBulkUpdate.find( {"_id": mongojs.ObjectId(doc.player_list[i]) }).update( {$set: { "isAlive": true} } );
+                    playerBulkUpdate.find( {"_id": mongojs.ObjectId(doc.player_list[i]) }).update( {$set: { "role": playerRole} } );
 
-                    bulkUpdate.execute(function(err,res){
+                    playerBulkUpdate.execute(function(err,res){
                         // Tell all the clients that the data is ready
-                        server.to(clientSocket.gameRoom).emit("gameIsReady");
+                        prepareGameData();
                     });
+
+                    //update the game doc
+                    function prepareGameDate(){
+                        var gameBulkUpdate = db.game.initializeUnorderedBulkOp();
+                        gameBulkUpdate.find( {"game_id": clientSocket.gameRoom }).update( {$set: { "inGame": true} } );
+                        gameBulkUpdate.find( {"game_id": clientSocket.gameRoom }).update( {$set: { "isAlive": true} } );
+                        gameBulkUpdate.find( {"game_id": clientSocket.gameRoom }).update( {$set: { "role": playerRole} } );
+
+                        gameBulkUpdate.execute(function(err,res){
+                            // Tell all the clients that the data is ready
+                            preparePrivateGameData();
+                        });
+                    }
+
+                    function preparePrivateGameData(){
+                        var gamePrivateBulkUpdate = db.gamePrivate.initializeUnorderedBulkOp();
+                        gamePrivateBulkUpdate.insert(newPrivateGameJSON);
+
+                        gamePrivateBulkUpdate.execute(function(err,res){
+                            server.to(clientSocket.gameRoom).emit("gameIsReady");
+                        });
+                    }
+                   
+
                 }
             }
             else{
@@ -233,5 +258,202 @@ module.exports = function(server,clientSocket){
             }
         });
     })
+
+    // In game socket
+    clientSocket.on("submitLynchAction",function(data){
+        //update the game doc
+        var gameBulkUpdate = db.game.initializeUnorderedBulkOp();
+
+        // confirm that the player has finished their lynch action
+        gameBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
+                                "player_list": { $elemMatch: { "player_id": clientSocket.player_id } }
+
+                            }).update( {$set: { "player_list.$.finishedAction": true} } );
+
+
+        gameBulkUpdate.execute(function(err,res){
+            updateLynchNumber();
+        })
+
+        function updateLynchNumber(){
+            var gamePrivateBulkUpdate = db.gamePrivate.initializeUnorderedBulkOp();
+            var numIncrease = 0;
+
+            // Increment the player's lynch votes
+            if(data.target_player_id != "none"){
+                numIncrease = 1;
+            }
+
+            gamePrivateBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
+                                               "player_status": { $elemMatch: { "player_id": data.target_player_id} }
+                                            }).update( {$inc: { "player_list.$.lynchVotes": numIncrease} } );
+
+            gamePrivateBulkUpdate.execute(function(err,res){
+                if(checkDoneAction()){
+                    //All other players are done their actions
+                    // endDay();
+                }
+            });
+
+        }
+    });
+
+    clientSocket.on("submitDetectiveAction",function(data){
+        // update the game doc
+        var gameBulkUpdate = db.game.initializeUnorderedBulkOp();
+
+        // confirm that the player has finished their detective action
+        gameBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
+                                "player_list": { $elemMatch: { "player_id": clientSocket.player_id } }
+
+                            }).update( {$set: { "player_list.$.finishedAction": true} } );
+
+        gameBulkUpdate.execute(function(err,res){
+            db.player.findOne({"_id": mongojs.ObjectId(data.target_player_id)},function(err,doc){
+                var newData;
+                if(doc.role == "mafia"){
+                    // player is mafia
+                    newData = {isMafia: true};
+                }
+                else{
+                    // player is not mafia
+                    newData = {isMafia: false};
+                }
+                server.to(clientSocket.player_id).emit("alertClient",newData);
+            })
+            if(checkDoneAction()){
+                // endNight();
+            }
+            
+        });
+    });
+
+    clientSocket.on("submitMafiaAction",function(data){
+        // update the game doc
+        var gameBulkUpdate = db.game.initializeUnorderedBulkOp();
+
+        // confirm that the player has finished their mafia action
+        gameBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
+                                "player_list": { $elemMatch: { "player_id": clientSocket.player_id } }
+
+                            }).update( {$set: { "player_list.$.finishedAction": true} } );
+
+        gameBulkUpdate.execute(function(err,res){
+            // Increment target player mafia votes
+            var gamePrivateBulkUpdate = db.gamePrivate.initializeUnorderedBulkOp();
+
+            gamePrivateBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
+                                               "player_status": { $elemMatch: { "player_id": data.target_player_id} }
+                                            }).update( {$inc: { "player_list.$.mafiaVotes": numIncrease} } );
+            gamePrivateBulkUpdate.execute(function(err,res){
+                if(checkDoneAction()){
+                    // endNight();
+                }
+            });
+        });
+    });
+
+    clientSocket.on("submitGuardianAngelAction",function(data){
+        // update the game doc
+        var gameBulkUpdate = db.game.initializeUnorderedBulkOp();
+
+        // confirm that the player has finished their mafia action
+        gameBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
+                                "player_list": { $elemMatch: { "player_id": clientSocket.player_id } }
+
+                            }).update( {$set: { "player_list.$.finishedAction": true} } );
+
+        gameBulkUpdate.execute(function(err,res){
+            // Increment target player mafia votes
+            var gamePrivateBulkUpdate = db.gamePrivate.initializeUnorderedBulkOp();
+
+            gamePrivateBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
+                                               "player_status": { $elemMatch: { "player_id": data.target_player_id} }
+                                            }).update( {$set: { "player_list.$.protectedByGuardian": true} } );
+
+            gamePrivateBulkUpdate.execute(function(err,res){
+                if(checkDoneAction()){
+                    // endNight();
+                }
+            });
+        });
+    });
+
+    // Returns true if all players have submitted an action, else returns false
+    function checkDoneAction(){
+        db.game.findOne({"game_id": clientSocket.gameRoom},function(err,doc){
+            var done = true;
+            playerArray.forEach(function(player){
+                if(player.finishedAction == false){
+                    done = false;
+                }
+            });
+
+            if(done){
+                return true;
+            }
+            return false;
+        })
+    }
+
+    function endDay(){
+
+
+
+
+        resetAll();
+    }
+
+    function endNight(){
+
+
+        resetAll();
+    }
+
+    function resetAll(){
+        db.game.findOne({"game_id": clientSocket.gameRoom},function(err,doc){
+            var gameBulkUpdate = db.game.initializeUnorderedBulkOp();
+
+            var player_list = doc.player_list;
+
+            player_list.forEach(function(player){
+                gameBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
+                                    "player_list": { $elemMatch: { "player_id": player.player_id } }
+
+                                }).update( {$set: { "player_list.$.finishedAction": false} } );
+            });
+
+            gameBulkUpdate.execute(function(err,res){
+                //done game updates
+            });
+        });
+
+        db.gamePrivate.findOne({"game_id": clientSocket.gameRoom},function(err,doc){
+            var gamePrivateBulkUpdate = db.gamePrivate.initializeUnorderedBulkOp();
+
+            var player_list = doc.player_status;
+
+            player_list.forEach(function(player){
+                gamePrivateBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
+                                    "player_status": { $elemMatch: { "player_id": player.player_id } }
+
+                                }).update( {$set: { "player_list.$.lynchVotes": 0} } );
+
+                gamePrivateBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
+                                    "player_status": { $elemMatch: { "player_id": player.player_id } }
+
+                                }).update( {$set: { "player_list.$.mafiaVotes": 0} } );
+
+                gamePrivateBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
+                                    "player_status": { $elemMatch: { "player_id": player.player_id } }
+
+                                }).update( {$set: { "player_list.$.protectedByGuardian": false} } );
+            });
+
+            gamePrivateBulkUpdate.execute(function(err,res){
+                //done game Private updates
+            });
+        });
+    }
 
 };

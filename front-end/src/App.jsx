@@ -25,7 +25,7 @@ class App extends Component {
 		this.handlePageChange = this.handlePageChange.bind(this);
 		this.handleNameChange = this.handleNameChange.bind(this);
 		this.handlePlayerIDChange = this.handlePlayerIDChange.bind(this);
-		this.state = {	page: "CreateProfile",
+		this.state = {	page: "Welcome",
 						player_name: "",
 						player_id: "",
 						game_id: "",
@@ -79,7 +79,7 @@ class App extends Component {
 				);
 			case "GameScreen":
 				return (
-					<GameScreen serverURL = {serverIP} player_id = {this.state.player_id} client = {this.state.client} game_id = {this.state.game_id}/>
+					<GameScreen serverURL = {serverIP} player_name = {this.state.player_name} player_id = {this.state.player_id} client = {this.state.client} game_id = {this.state.game_id}/>
 				);
 			default:
 				return (
