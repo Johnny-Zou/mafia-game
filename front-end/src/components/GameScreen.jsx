@@ -18,8 +18,9 @@ class GameScreen extends Component {
 	  				   game: {},
 	  				   player_ready: false,
 	  				   game_ready: false,
-	  				   player_select: "none",
-	  				   new_player_select: "none"
+	  				   player_select_name: "none",
+	  				   player_select_id: "none",
+	  				   new_player_select_id: "none"
 	  				};
 	}
 
@@ -56,31 +57,39 @@ class GameScreen extends Component {
 	}
 
 	handlePlayerSelectChange(e){
-		this.setState({"new_player_select": e.target.value});
+		this.setState({"new_player_select_id": e.target.value});
 	}
 
 	savePlayerSelect(){
-		this.setState({"player_select": this.state.new_player_select});
+		$.each(this.state.game.player_list, function(i, v) {
+		    if (v.player_id == this.state.new_player_select_id) {
+		        this.setState({"player_select_id": this.state.new_player_select_id, "player_select_name": v.player_name});
+		    }
+		    else{
+		    	console.log("error, cannot find player select name");
+		    }
+		});
+		
 	}
 
 	endTurn(){
 		const client = this.props.client;
 		if(this.state.game.game_status.day){
-			var data = {player_id: this.props.player_id, target_player_id: this.props.player_select};
+			var data = {player_id: this.props.player_id, target_player_id: this.state.player_select_id};
 			client.emit("submitLynchAction",data);
 		}
 		else{
 			switch(this.state.player.role){
 				case "detective":
-					var data = {player_id: this.props.player_id, target_player_id: this.props.player_select };
+					var data = {player_id: this.props.player_id, target_player_id: this.state.player_select_id };
 					client.emit("submitDetectiveAction",data);
 					break;
 				case "mafia":
-					var data = {player_id: this.props.player_id, target_player_id: this.props.player_select };
+					var data = {player_id: this.props.player_id, target_player_id: this.state.player_select_id };
 					client.emit("submitMafiaAction",data);
 					break;
 				case "guardianAngel":
-					var data = {player_id: this.props.player_id, target_player_id: this.props.player_select };
+					var data = {player_id: this.props.player_id, target_player_id: this.state.player_select_id };
 					client.emit("submitGuardianAngelAction",data);
 					break;
 				case "townsPeople":
@@ -181,7 +190,7 @@ class GameScreen extends Component {
 									<li className="list-group-item">Game Role: Detective</li>
 									<li className="list-group-item">Game Day: {this.state.game.game_status.day_counter}</li>
 									<li className="list-group-item">Currently: {this.state.game.game_status.day ? "day" : "night"}</li>
-									<li className="list-group-item">Currently Selected: {this.state.player_select}</li>
+									<li className="list-group-item">Currently Selected: {this.state.player_select_name}</li>
 								</ul>
 							</div>
 

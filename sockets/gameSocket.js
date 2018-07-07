@@ -1,5 +1,5 @@
 var mongojs = require('mongojs');
-var db = mongojs('mongodb://mafia_admin:bestappever_mafia_admin123@ds145790.mlab.com:45790/mafia_db',['game','player']);
+var db = mongojs('mongodb://mafia_admin:bestappever_mafia_admin123@ds145790.mlab.com:45790/mafia_db',['game','player','gamePrivate']);
 
 //shuffle algorithm
 function shuffle(a) {
