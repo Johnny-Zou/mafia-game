@@ -219,9 +219,9 @@ module.exports = function(server,clientSocket){
                         guardianAngelNum -= 1;
                     }
 
-                    playerBulkUpdate.find( {"_id": mongojs.ObjectId(doc.player_list[i]) }).update( {$set: { "inGame": true} } );
-                    playerBulkUpdate.find( {"_id": mongojs.ObjectId(doc.player_list[i]) }).update( {$set: { "isAlive": true} } );
-                    playerBulkUpdate.find( {"_id": mongojs.ObjectId(doc.player_list[i]) }).update( {$set: { "role": playerRole} } );
+                    playerBulkUpdate.find( {"_id": mongojs.ObjectId(doc.player_list[i].player_id) }).update( {$set: { "inGame": true} } );
+                    playerBulkUpdate.find( {"_id": mongojs.ObjectId(doc.player_list[i].player_id) }).update( {$set: { "isAlive": true} } );
+                    playerBulkUpdate.find( {"_id": mongojs.ObjectId(doc.player_list[i].player_id) }).update( {$set: { "role": playerRole} } );
 
                     playerBulkUpdate.execute(function(err,res){
                         // Tell all the clients that the data is ready
