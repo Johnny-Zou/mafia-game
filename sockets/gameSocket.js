@@ -18,7 +18,7 @@ module.exports = function(server,clientSocket){
 
         // add the player id into the mongojs database
         var bulkUpdate = db.game.initializeUnorderedBulkOp();
-        bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "player_list": {"player_id": clientSocket.player_id, "player_name:" clientSocket.nickname} } });
+        bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "player_list": {"player_id": clientSocket.player_id, "player_name": clientSocket.nickname} } });
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$inc: {"player_num": 1} });
         var newJoinAnnoucement = {  "from": "server",
                                 "from_id": "server",
@@ -30,7 +30,7 @@ module.exports = function(server,clientSocket){
 
         bulkUpdate.execute(function (err, res) {
             console.log("added " + clientSocket.player_id +" to" + clientSocket.gameRoom);
-        })
+        });
 
         //To everyone else in the gameRoom add a new person
         var newPerson = {player_name: data.player_name};
@@ -65,7 +65,7 @@ module.exports = function(server,clientSocket){
                                     "message": clientSocket.nickname + " has left the room",
                                  };
         server.to(clientSocket.gameRoom).emit("messageToClient",newLeaveAnnoucement);
-        bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "chat_log": newLeaveAnnoucement}})
+        bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "chat_log": newLeaveAnnoucement}});
 
         bulkUpdate.execute(function (err, res) {
             //if(lastErrorObject.n == 1){
@@ -94,7 +94,7 @@ module.exports = function(server,clientSocket){
                                     "message": clientSocket.nickname + " has left the room",
                                   };
             server.to(clientSocket.gameRoom).emit("messageToClient",newLeaveAnnoucement);
-            bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "chat_log": newLeaveAnnoucement}})
+            bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "chat_log": newLeaveAnnoucement}});
 
             bulkUpdate.execute(function (err, res) {
                 //if(lastErrorObject.n == 1){
@@ -118,7 +118,7 @@ module.exports = function(server,clientSocket){
                 "inGame": false,
                 "isAlive": true,
                 "role": "",
-            }
+            };
 
         //insert into the database
         db.player.insert(playerJSON,function(err,doc){
@@ -175,7 +175,7 @@ module.exports = function(server,clientSocket){
                             },
             "player_list": [],
             "chat_log": [],
-        }
+        };
 
         //insert game into game collection
         db.game.insert(gameJSON);
@@ -227,30 +227,28 @@ module.exports = function(server,clientSocket){
                         // Tell all the clients that the data is ready
                         prepareGameData();
                     });
+                }
 
-                    //update the game doc
-                    function prepareGameDate(){
-                        var gameBulkUpdate = db.game.initializeUnorderedBulkOp();
-                        gameBulkUpdate.find( {"game_id": clientSocket.gameRoom }).update( {$set: { "inGame": true} } );
-                        gameBulkUpdate.find( {"game_id": clientSocket.gameRoom }).update( {$set: { "isAlive": true} } );
-                        gameBulkUpdate.find( {"game_id": clientSocket.gameRoom }).update( {$set: { "role": playerRole} } );
+                 //update the game doc
+                function prepareGameDate(){
+                    var gameBulkUpdate = db.game.initializeUnorderedBulkOp();
+                    gameBulkUpdate.find( {"game_id": clientSocket.gameRoom }).update( {$set: { "inGame": true} } );
+                    gameBulkUpdate.find( {"game_id": clientSocket.gameRoom }).update( {$set: { "isAlive": true} } );
+                    gameBulkUpdate.find( {"game_id": clientSocket.gameRoom }).update( {$set: { "role": playerRole} } );
 
-                        gameBulkUpdate.execute(function(err,res){
-                            // Tell all the clients that the data is ready
-                            preparePrivateGameData();
-                        });
-                    }
+                    gameBulkUpdate.execute(function(err,res){
+                        // Tell all the clients that the data is ready
+                        preparePrivateGameData();
+                    });
+                }
 
-                    function preparePrivateGameData(){
-                        var gamePrivateBulkUpdate = db.gamePrivate.initializeUnorderedBulkOp();
-                        gamePrivateBulkUpdate.insert(newPrivateGameJSON);
+                function preparePrivateGameData(){
+                    var gamePrivateBulkUpdate = db.gamePrivate.initializeUnorderedBulkOp();
+                    gamePrivateBulkUpdate.insert(newPrivateGameJSON);
 
-                        gamePrivateBulkUpdate.execute(function(err,res){
-                            server.to(clientSocket.gameRoom).emit("gameIsReady");
-                        });
-                    }
-                   
-
+                    gamePrivateBulkUpdate.execute(function(err,res){
+                        server.to(clientSocket.gameRoom).emit("gameIsReady");
+                    });
                 }
             }
             else{
@@ -273,7 +271,7 @@ module.exports = function(server,clientSocket){
 
         gameBulkUpdate.execute(function(err,res){
             updateLynchNumber();
-        })
+        });
 
         function updateLynchNumber(){
             var gamePrivateBulkUpdate = db.gamePrivate.initializeUnorderedBulkOp();
@@ -320,7 +318,7 @@ module.exports = function(server,clientSocket){
                     newData = {isMafia: false};
                 }
                 server.to(clientSocket.player_id).emit("alertClient",newData);
-            })
+            });
             if(checkDoneAction()){
                 // endNight();
             }
@@ -384,7 +382,7 @@ module.exports = function(server,clientSocket){
         db.game.findOne({"game_id": clientSocket.gameRoom},function(err,doc){
             var done = true;
             playerArray.forEach(function(player){
-                if(player.finishedAction == false){
+                if(player.finishedAction === false){
                     done = false;
                 }
             });
@@ -393,7 +391,7 @@ module.exports = function(server,clientSocket){
                 return true;
             }
             return false;
-        })
+        });
     }
 
     function endDay(){
