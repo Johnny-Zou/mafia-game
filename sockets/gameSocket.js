@@ -341,7 +341,7 @@ module.exports = function(server,clientSocket){
                     newData = {isMafia: false};
                 }
                 console.log("sent detective action");
-                server.to(clientSocket.player_id).emit("alertClient",newData);
+                server.to(clientSocket.id).emit("alertClient",newData);
             });
             if(checkDoneAction()){
                 // endNight();
@@ -369,6 +369,7 @@ module.exports = function(server,clientSocket){
                                                "player_status": { $elemMatch: { "player_id": data.target_player_id} }
                                             }).update( {$inc: { "player_list.$.mafiaVotes": numIncrease} } );
             gamePrivateBulkUpdate.execute(function(err,res){
+                console.log("updated Mafia");
                 if(checkDoneAction()){
                     // endNight();
                 }
@@ -395,6 +396,7 @@ module.exports = function(server,clientSocket){
                                             }).update( {$set: { "player_list.$.protectedByGuardian": true} } );
 
             gamePrivateBulkUpdate.execute(function(err,res){
+                console.log("updatedGA");
                 if(checkDoneAction()){
                     // endNight();
                 }

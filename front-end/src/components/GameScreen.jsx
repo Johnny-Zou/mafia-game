@@ -70,7 +70,6 @@ class GameScreen extends Component {
 	}
 
 	endTurn(){
-		console.log('in end turn');
 		const client = this.props.client;
 		if(this.state.game.game_status.day){
 			var dataLynch = {player_id: this.props.player_id, target_player_id: this.state.player_select_id};
@@ -81,7 +80,6 @@ class GameScreen extends Component {
 				case "detective":
 					var dataDetective = {player_id: this.props.player_id, target_player_id: this.state.player_select_id };
 					client.emit("submitDetectiveAction",dataDetective);
-					console.log("sent data");
 					break;
 				case "mafia":
 					var dataMafia = {player_id: this.props.player_id, target_player_id: this.state.player_select_id };
@@ -104,17 +102,18 @@ class GameScreen extends Component {
 	_alertClient(data){
 		switch(this.state.player.role){
 			case "detective":
-				console.log("alerted")
 				if(data.isMafia){
 					window.alert("HE IS THE MAFIA");
 				}
 				else{
-					window.alert("he is not the mafia");
+					window.alert("He is not the mafia");
 				}
 				break;
 			case "mafia":
+				window.alert(data.target_player_name + "will be killed");
 				break;
 			case "guardianAngel":
+				window.alert(data.target_player_name + "will be saved");
 				break;
 			case "townsPeople":
 				break;
@@ -229,16 +228,201 @@ class GameScreen extends Component {
 						</div>
 					);
 				case "mafia":
-					return (
-						<div></div>
-					); 
+					if(!this.state.game.game_status.day){
+						actions = 	<div className="row justify-content-center text-center">
+										<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
+						       				<button type="button" className="btn btn-lg btn-danger" data-toggle="modal" data-target="#playerSelectModalLynch">Kill</button>
+						       			</div>
+										{playerSelectModal}
+									</div>;
+					}
+					return(
+						<div>
+							<div className="text-center">
+								<h1>Game Screen | Mafia - the party game</h1>
+								<p>Hey {this.props.player_name}, welcome to the game screen</p>
+							</div>
+			    			
+			    			<br/>
+
+							<div className ="container">
+								<div className="card bg-primary text-white">
+									<div className="card-body">Game Info</div>
+								</div>
+								<br/>
+								<ul className="list-group col-6 mx-auto">
+									<li className="list-group-item">Game ID: {this.props.game_id}</li>
+									<li className="list-group-item">Game Role: Detective</li>
+									<li className="list-group-item">Game Day: {this.state.game.game_status.day_counter}</li>
+									<li className="list-group-item">Currently: {this.state.game.game_status.day ? "day" : "night"}</li>
+									<li className="list-group-item">Currently Selected: {this.state.player_select_name}</li>
+								</ul>
+							</div>
+
+							<br/>
+							<div className ="container">
+								<div className="card bg-primary text-white">
+									<div className="card-body">Game Actions</div>
+								</div>
+							</div>
+							<br/>
+							<div className ="container">
+								{actions}
+								<br/>
+								<br/>
+								<div className="row justify-content-center text-center">
+									<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
+					       				<button type="button" className="btn btn-primary" onClick={this.endTurn}>End {this.state.game.game_status.day ? "day" : "night"}</button>
+					       			</div>
+					       			<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
+					       				<button type="button" className="btn btn-primary" disabled>Quit Game</button>
+					       			</div>
+								</div>
+							</div>
+
+							<br/>
+			    			<div className ="container">
+								<div className="card bg-primary text-white">
+									<div className="card-body">Game Chat</div>
+								</div>
+							</div>
+							<br/>
+							<ChatFeatures serverURL = {this.props.serverURL} client = {this.props.client} player_name = {this.props.player_name} game_id = {this.props.game_id}/>
+
+							<br/>
+							<br/>
+						</div>
+					);
 				case "guardianAngel":
-					return (
-						<div></div>
+					if(!this.state.game.game_status.day){
+						actions = 	<div className="row justify-content-center text-center">
+										<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
+						       				<button type="button" className="btn btn-lg btn-danger" data-toggle="modal" data-target="#playerSelectModalLynch">Save</button>
+						       			</div>
+										{playerSelectModal}
+									</div>;
+					}
+					return(
+						<div>
+							<div className="text-center">
+								<h1>Game Screen | Mafia - the party game</h1>
+								<p>Hey {this.props.player_name}, welcome to the game screen</p>
+							</div>
+			    			
+			    			<br/>
+
+							<div className ="container">
+								<div className="card bg-primary text-white">
+									<div className="card-body">Game Info</div>
+								</div>
+								<br/>
+								<ul className="list-group col-6 mx-auto">
+									<li className="list-group-item">Game ID: {this.props.game_id}</li>
+									<li className="list-group-item">Game Role: Detective</li>
+									<li className="list-group-item">Game Day: {this.state.game.game_status.day_counter}</li>
+									<li className="list-group-item">Currently: {this.state.game.game_status.day ? "day" : "night"}</li>
+									<li className="list-group-item">Currently Selected: {this.state.player_select_name}</li>
+								</ul>
+							</div>
+
+							<br/>
+							<div className ="container">
+								<div className="card bg-primary text-white">
+									<div className="card-body">Game Actions</div>
+								</div>
+							</div>
+							<br/>
+							<div className ="container">
+								{actions}
+								<br/>
+								<br/>
+								<div className="row justify-content-center text-center">
+									<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
+					       				<button type="button" className="btn btn-primary" onClick={this.endTurn}>End {this.state.game.game_status.day ? "day" : "night"}</button>
+					       			</div>
+					       			<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
+					       				<button type="button" className="btn btn-primary" disabled>Quit Game</button>
+					       			</div>
+								</div>
+							</div>
+
+							<br/>
+			    			<div className ="container">
+								<div className="card bg-primary text-white">
+									<div className="card-body">Game Chat</div>
+								</div>
+							</div>
+							<br/>
+							<ChatFeatures serverURL = {this.props.serverURL} client = {this.props.client} player_name = {this.props.player_name} game_id = {this.props.game_id}/>
+
+							<br/>
+							<br/>
+						</div>
 					);
 				case "townsPeople":
-					return (
-						<div></div>
+					if(!this.state.game.game_status.day){
+						actions = 	<div className="row justify-content-center text-center">
+										<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
+						       				<button type="button" className="btn btn-lg btn-danger" disable>Chill</button>
+						       			</div>
+									</div>;
+					}
+					return(
+						<div>
+							<div className="text-center">
+								<h1>Game Screen | Mafia - the party game</h1>
+								<p>Hey {this.props.player_name}, welcome to the game screen</p>
+							</div>
+			    			
+			    			<br/>
+
+							<div className ="container">
+								<div className="card bg-primary text-white">
+									<div className="card-body">Game Info</div>
+								</div>
+								<br/>
+								<ul className="list-group col-6 mx-auto">
+									<li className="list-group-item">Game ID: {this.props.game_id}</li>
+									<li className="list-group-item">Game Role: Detective</li>
+									<li className="list-group-item">Game Day: {this.state.game.game_status.day_counter}</li>
+									<li className="list-group-item">Currently: {this.state.game.game_status.day ? "day" : "night"}</li>
+									<li className="list-group-item">Currently Selected: {this.state.player_select_name}</li>
+								</ul>
+							</div>
+
+							<br/>
+							<div className ="container">
+								<div className="card bg-primary text-white">
+									<div className="card-body">Game Actions</div>
+								</div>
+							</div>
+							<br/>
+							<div className ="container">
+								{actions}
+								<br/>
+								<br/>
+								<div className="row justify-content-center text-center">
+									<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
+					       				<button type="button" className="btn btn-primary" onClick={this.endTurn}>End {this.state.game.game_status.day ? "day" : "night"}</button>
+					       			</div>
+					       			<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
+					       				<button type="button" className="btn btn-primary" disabled>Quit Game</button>
+					       			</div>
+								</div>
+							</div>
+
+							<br/>
+			    			<div className ="container">
+								<div className="card bg-primary text-white">
+									<div className="card-body">Game Chat</div>
+								</div>
+							</div>
+							<br/>
+							<ChatFeatures serverURL = {this.props.serverURL} client = {this.props.client} player_name = {this.props.player_name} game_id = {this.props.game_id}/>
+
+							<br/>
+							<br/>
+						</div>
 					);
 				default:
 					return (
