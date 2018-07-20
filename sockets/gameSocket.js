@@ -29,7 +29,7 @@ module.exports = function(server,clientSocket){
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "chat_log": newJoinAnnoucement}});
 
         bulkUpdate.execute(function (err, res) {
-            console.log("added " + clientSocket.player_id +" to" + clientSocket.gameRoom);
+            // console.log("added " + clientSocket.player_id +" to" + clientSocket.gameRoom);
         });
 
         //To everyone else in the gameRoom add a new person
@@ -69,7 +69,7 @@ module.exports = function(server,clientSocket){
 
         bulkUpdate.execute(function (err, res) {
             //if(lastErrorObject.n == 1){
-                console.log("removed" + clientSocket.nickname + "from game room" + clientSocket.gameRoom);
+                // console.log("removed" + clientSocket.nickname + "from game room" + clientSocket.gameRoom);
                 server.to(clientSocket.gameRoom).emit("playerLeaving",player);
                 clientSocket.leave(clientSocket.gameRoom);
             //}
@@ -98,7 +98,7 @@ module.exports = function(server,clientSocket){
 
             bulkUpdate.execute(function (err, res) {
                 //if(lastErrorObject.n == 1){
-                    console.log("removed" + clientSocket.nickname + "from game room" + clientSocket.gameRoom);
+                    // console.log("removed" + clientSocket.nickname + "from game room" + clientSocket.gameRoom);
                     server.to(clientSocket.gameRoom).emit("playerLeaving",player);
                     clientSocket.leave(clientSocket.gameRoom);
                 //}
@@ -318,6 +318,7 @@ module.exports = function(server,clientSocket){
     });
 
     clientSocket.on("submitDetectiveAction",function(data){
+        console.log("infunction submitting detective action");
         // update the game doc
         var gameBulkUpdate = db.game.initializeUnorderedBulkOp();
 
@@ -328,6 +329,7 @@ module.exports = function(server,clientSocket){
                             }).update( {$set: { "player_list.$.finishedAction": true} } );
 
         gameBulkUpdate.execute(function(err,res){
+            console.log("executing game bulk update");
             db.player.findOne({"_id": mongojs.ObjectId(data.target_player_id)},function(err,doc){
                 var newData;
                 if(doc.role == "mafia"){
@@ -338,10 +340,12 @@ module.exports = function(server,clientSocket){
                     // player is not mafia
                     newData = {isMafia: false};
                 }
+                console.log("sent detective action");
                 server.to(clientSocket.player_id).emit("alertClient",newData);
             });
             if(checkDoneAction()){
                 // endNight();
+                console.log("ending night");
             }
             
         });
@@ -417,16 +421,10 @@ module.exports = function(server,clientSocket){
     }
 
     function endDay(){
-
-
-
-
         resetAll();
     }
 
     function endNight(){
-
-
         resetAll();
     }
 

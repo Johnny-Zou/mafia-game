@@ -66,32 +66,30 @@ class GameScreen extends Component {
 		    if (v.player_id == self.state.new_player_select_id) {
 		        self.setState({"player_select_id": self.state.new_player_select_id, "player_select_name": v.player_name});
 		    }
-		    else{
-		    	console.log("error, cannot find player select name");
-		    }
 		});
-		
 	}
 
 	endTurn(){
+		console.log('in end turn');
 		const client = this.props.client;
 		if(this.state.game.game_status.day){
-			var data = {player_id: this.props.player_id, target_player_id: this.state.player_select_id};
-			client.emit("submitLynchAction",data);
+			var dataLynch = {player_id: this.props.player_id, target_player_id: this.state.player_select_id};
+			client.emit("submitLynchAction",dataLynch);
 		}
 		else{
 			switch(this.state.player.role){
 				case "detective":
-					var data = {player_id: this.props.player_id, target_player_id: this.state.player_select_id };
-					client.emit("submitDetectiveAction",data);
+					var dataDetective = {player_id: this.props.player_id, target_player_id: this.state.player_select_id };
+					client.emit("submitDetectiveAction",dataDetective);
+					console.log("sent data");
 					break;
 				case "mafia":
-					var data = {player_id: this.props.player_id, target_player_id: this.state.player_select_id };
-					client.emit("submitMafiaAction",data);
+					var dataMafia = {player_id: this.props.player_id, target_player_id: this.state.player_select_id };
+					client.emit("submitMafiaAction",dataMafia);
 					break;
 				case "guardianAngel":
-					var data = {player_id: this.props.player_id, target_player_id: this.state.player_select_id };
-					client.emit("submitGuardianAngelAction",data);
+					var dataGuardianAngel = {player_id: this.props.player_id, target_player_id: this.state.player_select_id };
+					client.emit("submitGuardianAngelAction",dataGuardianAngel);
 					break;
 				case "townsPeople":
 					console.log("nothing to do");
@@ -106,6 +104,7 @@ class GameScreen extends Component {
 	_alertClient(data){
 		switch(this.state.player.role){
 			case "detective":
+				console.log("alerted")
 				if(data.isMafia){
 					window.alert("HE IS THE MAFIA");
 				}

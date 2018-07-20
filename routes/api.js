@@ -18,10 +18,10 @@ router.use(function(req, res, next) {
 router.get('/game', function(req, res, next){
     db.game.find(function(err, gameList){
         if(err){
-            console.log("GET request to /game: ERROR-",err);
+            //console.log("GET request to /game: ERROR-",err);
             res.send(err);
         }
-        console.log("GET request to /game: SUCCESS,",gameList);
+        //console.log("GET request to /game: SUCCESS,",gameList);
         res.json(gameList);
     });
 });
@@ -30,18 +30,18 @@ router.get('/game', function(req, res, next){
 router.get('/game/:id', function(req, res, next){
     db.game.findOne({"game_id": req.params.id}, function(err, game){
         if(err){
-            console.log("GET request to /game/id: ERROR-",err);
+            //console.log("GET request to /game/id: ERROR-",err);
             res.send(err);
         }
         else if(!game){
-            console.log("Could not find game");
+            //console.log("Could not find game");
             res.status(404);
             res.json({
                 "error": "No game found"
             });
             return;
         }
-        console.log("GET request to /game/id: SUCCESS,",game);
+        //console.log("GET request to /game/id: SUCCESS,",game);
         res.json(game);
     });
 });
@@ -50,18 +50,18 @@ router.get('/game/:id', function(req, res, next){
 router.get('/player/:id', function(req, res, next){
     db.player.findOne({"_id": mongojs.ObjectId(req.params.id)}, function(err, player){
         if(err){
-            console.log("GET request to /player/id: ERROR-",err);
+            //console.log("GET request to /player/id: ERROR-",err);
             res.send(err);
         }
         else if(!player){
-            console.log("Could not find player");
+            //console.log("Could not find player");
             res.status(404);
             res.json({
                 "error": "No player found"
             });
             return;
         }
-        console.log("GET request to /player/id: SUCCESS,",player);
+        //console.log("GET request to /player/id: SUCCESS,",player);
         res.json(player);
     });
 });
@@ -81,21 +81,21 @@ router.post('/game', function(req, res, next){
     var uncompletedFields = game_id_complete || player_num_complete;
 
     if(uncompletedFields){
-        console.log("Post request to /game: ERROR uncomplete fields with body",newGame);
-        console.log("game_id missing:", game_id_complete);
-        console.log("player_num missing:", player_num_complete);
+        //console.log("Post request to /game: ERROR uncomplete fields with body",newGame);
+        //console.log("game_id missing:", game_id_complete);
+        //console.log("player_num missing:", player_num_complete);
         res.status(400);
         res.json({
             "error": "Bad Data"
         });
     } else {
-        console.log("Post request to /game:",newGame);
+        //console.log("Post request to /game:",newGame);
         db.game.save(newGame, function(err, game){
             if(err){
-                console.log("Post request to /game: ERROR,",err);
+                //console.log("Post request to /game: ERROR,",err);
                 res.send(err);
             }
-            console.log("Post request to /game: SUCCESS,",game);
+            //console.log("Post request to /game: SUCCESS,",game);
             res.json(game);
         });
     }
@@ -105,18 +105,18 @@ router.post('/game', function(req, res, next){
 router.delete('/game/:id', function(req, res, next){
     db.game.remove({"game_id": req.params.id}, function(err, game){
         if(err){
-            console.log("Delete request to /game/:id: ERROR,",err);
+            //console.log("Delete request to /game/:id: ERROR,",err);
             res.send(err);
         }
         if(!game){
-            console.log("Could not find game");
+            //console.log("Could not find game");
             res.status(404);
             res.json({
                 "error": "No game found"
             });
             return;
         }
-        console.log("Delete request to /game/:id: SUCCESS",game)
+        //console.log("Delete request to /game/:id: SUCCESS",game)
         res.json(game);
     });
 });
@@ -135,7 +135,7 @@ router.put('/game/:id', function(req, res, next){
 
     // Check empty
     if(!updateGame){
-        console.log("Put request to /game/:id: ERROR uncomplete fields with body,",updateGame);
+        //console.log("Put request to /game/:id: ERROR uncomplete fields with body,",updateGame);
         res.status(400);
         res.json({
             "error":"Bad Data"
@@ -143,18 +143,18 @@ router.put('/game/:id', function(req, res, next){
     } else {
         db.game.update({"game_id": req.params.id}, updateGame, {}, function(err, game){
             if(err){
-                console.log("Put request to /game/:id: DB ERROR with body,",updateGame);
+                //console.log("Put request to /game/:id: DB ERROR with body,",updateGame);
                 res.send(err);
             }
             if(!game){
-                console.log("Could not find game");
+                //console.log("Could not find game");
                 res.status(404);
                 res.json({
                     "error": "No game found"
                 });
                 return;
             }
-            console.log("Put request to /game/:id: SUCCESS",updateGame);
+            //console.log("Put request to /game/:id: SUCCESS",updateGame);
             res.json(game);
         });
     }

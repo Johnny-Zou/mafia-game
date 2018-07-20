@@ -57,13 +57,10 @@ class JoinGame extends Component {
 			switch(this.state.errorType){
 				case 0:
 					return <p></p>;
-					break;
 				case 1:
 					return <p>Error, you must enter a game id</p>;
-					break;
 				case 2:
 					return <p>Sorry, that game id doesn't seem to exist</p>;
-					break;
 				default:
 					return <p>Unknown Error</p>;
 			}
