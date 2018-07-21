@@ -393,7 +393,7 @@ module.exports = function(server,clientSocket){
 
             gamePrivateBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
                                                "player_status": { $elemMatch: { "player_id": data.target_player_id} }
-                                            }).update( {$set: { "player_list.$.protectedByGuardian": true} } );
+                                            }).update( {$inc: { "player_list.$.guardianVotes": true} } );
 
             gamePrivateBulkUpdate.execute(function(err,res){
                 console.log("updatedGA");
