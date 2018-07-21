@@ -18,7 +18,12 @@ module.exports = function(server,clientSocket){
 
         // add the player id into the mongojs database
         var bulkUpdate = db.game.initializeUnorderedBulkOp();
-        bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "player_list": {"player_id": clientSocket.player_id, "player_name": clientSocket.nickname} } });
+        var playerListJSON = {  "player_id": clientSocket.player_id, 
+                                "player_name": clientSocket.nickname,
+                                "finishedAction": false,
+                                "isAlive": true,
+                            };
+        bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$push: { "player_list": playerListJSON} });
         bulkUpdate.find({"game_id": clientSocket.gameRoom}).update({$inc: {"player_num": 1} });
         var newJoinAnnoucement = {  "from": "server",
                                 "from_id": "server",
@@ -252,7 +257,6 @@ module.exports = function(server,clientSocket){
                                             "lynchVotes": 0,
                                             "mafiaVotes": 0,
                                             "guardianVotes": 0,
-                                            "isAlive": true,
 
                                         };
                         playerStatusArray.push(newPlayer);
@@ -301,10 +305,10 @@ module.exports = function(server,clientSocket){
 
                 gamePrivateBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
                                                "player_status": { $elemMatch: { "player_id": data.target_player_id} }
-                                            }).update( {$inc: { "player_list.$.lynchVotes": 1} } );
+                                            }).update( {$inc: { "player_status.$.lynchVotes": 1} } );
 
                 gamePrivateBulkUpdate.execute(function(err,res){
-                    newData = {"target_player_id": data.target_player_id};
+                    var newData = {"target_player_id": data.target_player_id};
                     server.to(clientSocket.id).emit("alertClient",newData);
                     if(checkDoneAction()){
                         //All other players are done their actions
@@ -313,7 +317,7 @@ module.exports = function(server,clientSocket){
                 });
             }
             else{
-                newData = {"target_player_id": data.target_player_id};
+                var newData = {"target_player_id": data.target_player_id};
                 server.to(clientSocket.id).emit("alertClient",newData);
             }
 
@@ -329,7 +333,7 @@ module.exports = function(server,clientSocket){
         gameBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
                                 "player_list": { $elemMatch: { "player_id": clientSocket.player_id } }
 
-                            }).update( {$set: { "player_list.$.finishedAction": true} } );
+                            }).update( {$set: { "player_status.$.finishedAction": true} } );
 
         gameBulkUpdate.execute(function(err,res){
             console.log("executing game bulk update");
@@ -371,10 +375,10 @@ module.exports = function(server,clientSocket){
 
                 gamePrivateBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
                                                    "player_status": { $elemMatch: { "player_id": data.target_player_id} }
-                                                }).update( {$inc: { "player_list.$.mafiaVotes": 1} } );
+                                                }).update( {$inc: { "player_status.$.mafiaVotes": 1} } );
                 gamePrivateBulkUpdate.execute(function(err,res){
                     console.log("updated Mafia");
-                    newData = {};
+                    var newData = {"target_player_id": data.target_player_id};
                     server.to(clientSocket.id).emit("alertClient",newData);
                     if(checkDoneAction()){
                         // endNight();
@@ -382,7 +386,7 @@ module.exports = function(server,clientSocket){
                 });
             }
             else {
-                newData = {};
+                var newData = {"target_player_id": data.target_player_id};
                 server.to(clientSocket.id).emit("alertClient",newData);
             }
         });
@@ -405,11 +409,11 @@ module.exports = function(server,clientSocket){
 
                 gamePrivateBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
                                                    "player_status": { $elemMatch: { "player_id": data.target_player_id} }
-                                                }).update( {$inc: { "player_list.$.guardianVotes": 1} } );
+                                                }).update( {$inc: { "player_status.$.guardianVotes": 1} } );
 
                 gamePrivateBulkUpdate.execute(function(err,res){
                     console.log("updatedGA");
-                    newData = {};
+                    var newData = {"target_player_id": data.target_player_id};
                     server.to(clientSocket.id).emit("alertClient",newData);
                     if(checkDoneAction()){
                         // endNight();
@@ -417,7 +421,7 @@ module.exports = function(server,clientSocket){
                 });
             }
             else{
-                newData = {};
+                var newData = {"target_player_id": data.target_player_id};
                 server.to(clientSocket.id).emit("alertClient",newData);
             }
         });
@@ -476,17 +480,17 @@ module.exports = function(server,clientSocket){
                 gamePrivateBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
                                     "player_status": { $elemMatch: { "player_id": player.player_id } }
 
-                                }).update( {$set: { "player_list.$.lynchVotes": 0} } );
+                                }).update( {$set: { "player_status.$.lynchVotes": 0} } );
 
                 gamePrivateBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
                                     "player_status": { $elemMatch: { "player_id": player.player_id } }
 
-                                }).update( {$set: { "player_list.$.mafiaVotes": 0} } );
+                                }).update( {$set: { "player_status.$.mafiaVotes": 0} } );
 
                 gamePrivateBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
                                     "player_status": { $elemMatch: { "player_id": player.player_id } }
 
-                                }).update( {$set: { "player_list.$.guardianVotes": 0} } );
+                                }).update( {$set: { "player_status.$.guardianVotes": 0} } );
             });
 
             gamePrivateBulkUpdate.execute(function(err,res){

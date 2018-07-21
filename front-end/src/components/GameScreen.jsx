@@ -110,10 +110,14 @@ class GameScreen extends Component {
 				}
 				break;
 			case "mafia":
-				window.alert(data.target_player_name + "will be killed");
+				var playerList = this.state.game.player_list;
+				var foundPlayer = playerList.find(element => element.player_id == data.target_player_id);
+				window.alert(foundPlayer.player_name + " will be killed");
 				break;
 			case "guardianAngel":
-				window.alert(data.target_player_name + "will be saved");
+				var playerList = this.state.game.player_list;
+				var foundPlayer = playerList.find(element => element.player_id == data.target_player_id);
+				window.alert(data.target_player_name + " will be saved");
 				break;
 			case "townsPeople":
 				break;
@@ -186,7 +190,7 @@ class GameScreen extends Component {
 								<br/>
 								<ul className="list-group col-6 mx-auto">
 									<li className="list-group-item">Game ID: {this.props.game_id}</li>
-									<li className="list-group-item">Game Role: Detective</li>
+									<li className="list-group-item">Game Role: {this.state.player.role} </li>
 									<li className="list-group-item">Game Day: {this.state.game.game_status.day_counter}</li>
 									<li className="list-group-item">Currently: {this.state.game.game_status.day ? "day" : "night"}</li>
 									<li className="list-group-item">Currently Selected: {this.state.player_select_name}</li>
@@ -252,7 +256,7 @@ class GameScreen extends Component {
 								<br/>
 								<ul className="list-group col-6 mx-auto">
 									<li className="list-group-item">Game ID: {this.props.game_id}</li>
-									<li className="list-group-item">Game Role: Detective</li>
+									<li className="list-group-item">Game Role: {this.state.player.role} </li>
 									<li className="list-group-item">Game Day: {this.state.game.game_status.day_counter}</li>
 									<li className="list-group-item">Currently: {this.state.game.game_status.day ? "day" : "night"}</li>
 									<li className="list-group-item">Currently Selected: {this.state.player_select_name}</li>
@@ -318,7 +322,7 @@ class GameScreen extends Component {
 								<br/>
 								<ul className="list-group col-6 mx-auto">
 									<li className="list-group-item">Game ID: {this.props.game_id}</li>
-									<li className="list-group-item">Game Role: Detective</li>
+									<li className="list-group-item">Game Role: {this.state.player.role} </li>
 									<li className="list-group-item">Game Day: {this.state.game.game_status.day_counter}</li>
 									<li className="list-group-item">Currently: {this.state.game.game_status.day ? "day" : "night"}</li>
 									<li className="list-group-item">Currently Selected: {this.state.player_select_name}</li>
@@ -383,7 +387,7 @@ class GameScreen extends Component {
 								<br/>
 								<ul className="list-group col-6 mx-auto">
 									<li className="list-group-item">Game ID: {this.props.game_id}</li>
-									<li className="list-group-item">Game Role: Detective</li>
+									<li className="list-group-item">Game Role: {this.state.player.role}</li>
 									<li className="list-group-item">Game Day: {this.state.game.game_status.day_counter}</li>
 									<li className="list-group-item">Currently: {this.state.game.game_status.day ? "day" : "night"}</li>
 									<li className="list-group-item">Currently Selected: {this.state.player_select_name}</li>
