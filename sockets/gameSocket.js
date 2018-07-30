@@ -164,6 +164,7 @@ module.exports = function(server,clientSocket){
             "game_status": { "game_started": false,
                              "day_counter": null,
                              "isDay": null,
+                             "next_change_time": null,
                              "gameRoles": [ {   "type": "detective",
                                                 "amount": data.detectiveNum,
                                             },
@@ -241,6 +242,11 @@ module.exports = function(server,clientSocket){
                     gameBulkUpdate.find( {"game_id": clientSocket.gameRoom }).update( {$set: { "game_status.day_counter": 1} } );
                     gameBulkUpdate.find( {"game_id": clientSocket.gameRoom }).update( {$set: { "game_status.isDay": false} } );
 
+                    var oldDateObj = new Date();
+                    var timerMinutes = 1;
+                    var newDateObj = new Date(oldDateObj.getTime() + timerMinutes*60000);                     
+                    gameBulkUpdate.find( {"game_id": clientSocket.gameRoom }).update( {$set: { "game_status.next_change_time": newDateObj} } );
+
                     gameBulkUpdate.execute(function(err,res){
                         // Tell all the clients that the data is ready
                         preparePrivateGameData();
@@ -265,7 +271,11 @@ module.exports = function(server,clientSocket){
 
                     var newPrivateGameJSON = {  
                                                 "game_id": clientSocket.gameRoom,                         
-                                                "game_history": [],
+                                                "game_history": [{
+                                                        "isDay": false,
+                                                        "num_day": 0,
+                                                        "results":  []
+                                                }],
                                                 "player_status": playerStatusArray
                                             };
                                             
@@ -311,8 +321,7 @@ module.exports = function(server,clientSocket){
                     var newData = {"target_player_id": data.target_player_id};
                     server.to(clientSocket.id).emit("alertClient",newData);
                     if(checkDoneAction()){
-                        //All other players are done their actions
-                        // endDay();
+                        endDayNight(clientSocket.gameRoom,true);
                     }
                 });
             }
@@ -347,13 +356,28 @@ module.exports = function(server,clientSocket){
                     // player is not mafia
                     newData = {isMafia: false};
                 }
-                console.log("sent detective action");
-                server.to(clientSocket.id).emit("alertClient",newData);
 
-                if(checkDoneAction()){
-                    // endNight();
-                    console.log("ending night");
-                }
+
+                db.game.findOne({"_id": mongojs.ObjectId(data.target_player_id)},function(err,gameDoc){
+                    var gamePrivateBulkUpdate = db.gamePrivate.initializeUnorderedBulkOp();
+                    var playerList = gameDoc.player_list;
+                    var foundPlayer = playerList.find(element => element.player_id == data.target_player_id);
+
+                    var game_history_detective = {  "affected_player_id": data.target_player_id,
+                                                    "affected_player_name": foundPlayer.player_name,
+                                                    "affect": "investigated"
+                                                 };
+
+                    gamePrivateBulkUpdate.find({"game_id": game_id, "game_history.isDay": false, "game_history.num_day": dayNumber})
+                    .update({$push: {"game_history.$.results": game_history_guardian}});
+
+                    gamePrivateBulkUpdate.execute(function(err,res){
+                        server.to(clientSocket.id).emit("alertClient",newData);
+                        if(checkDoneAction()){
+                            endDayNight(clientSocket.gameRoom,false);
+                        }
+                    });
+                });
             });
         });
     });
@@ -381,7 +405,7 @@ module.exports = function(server,clientSocket){
                     var newData = {"target_player_id": data.target_player_id};
                     server.to(clientSocket.id).emit("alertClient",newData);
                     if(checkDoneAction()){
-                        // endNight();
+                        endDayNight(clientSocket.gameRoom,false);
                     }
                 });
             }
@@ -416,7 +440,7 @@ module.exports = function(server,clientSocket){
                     var newData = {"target_player_id": data.target_player_id};
                     server.to(clientSocket.id).emit("alertClient",newData);
                     if(checkDoneAction()){
-                        // endNight();
+                        endDayNight(clientSocket.gameRoom,false);
                     }
                 });
             }
@@ -425,6 +449,10 @@ module.exports = function(server,clientSocket){
                 server.to(clientSocket.id).emit("alertClient",newData);
             }
         });
+    });
+
+    clientSocket.on("submitTownstownsPeopleAction",function(data){
+
     });
 
     // Returns true if all players have submitted an action, else returns false
@@ -445,15 +473,177 @@ module.exports = function(server,clientSocket){
         });
     }
 
-    function endDay(){
-        resetAll();
-    }
+    function endDayNight(game_id,isDay){
+        // Resolve Day/Night actions
+        new promise( function(resolve, reject) {
+            db.gamePrivate.findOne({"game_id": game_id},function(err,doc){
+                // If there is an error, reject the promise
+                if(err){
+                    reject();
+                }
 
-    function endNight(){
-        resetAll();
+                var gamePrivateBulkUpdate = db.gamePrivate.initializeOrderedBulkOP();
+
+                // Obtain player with highest number of each votes
+                if(isDay){
+                    var lynchedPlayerList = [];
+                    var lycnhVotes = 1;
+                }
+                else{
+                    var mafiaKilledPlayerList = [];
+                    var mafiaKillVotes = 1;
+                    var guardianSavedPlayerList = [];
+                    var guardianSaveVotes = 1;
+                }
+                
+                // Loop through the player list and pick the highest votes
+                var player_status = doc.player_status;
+                player_status.forEach(function(player){
+                    if(isDay){
+                        // Get the highest number of lynch votes
+                        if(player.lynchVotes > lycnhVotes){
+                            lynchedPlayerList = [];
+                            lynchedPlayerList.push({
+                                "player_name": player.player_name,
+                                "player_id": player.player_id
+                            });
+                        }
+                        else if(player.guardianVotes == guardianKillVotes){
+                            lynchedPlayerList.push({
+                                "player_name": player.player_name,
+                                "player_id": player.player_id
+                            });
+                        }
+                    }
+                    else{
+                        // Get the highest number of votes for mafia target
+                        if(player.mafiaVotes > mafiaKillVotes){
+                            mafiaKilledPlayerList = [];
+                            mafiaKilledPlayerList.push({
+                                "player_name": player.player_name,
+                                "player_id": player.player_id
+                            });
+                        }
+                        else if(player.mafiaVotes == mafiaKillVotes){
+                            mafiaKilledPlayerList.push({
+                                "player_name": player.player_name,
+                                "player_id": player.player_id
+                            });
+                        }
+                        // Get the highest number of votes for the guardian angel
+                        if(player.guardianVotes > guardianKillVotes){
+                            guardianSavedPlayerList = [];
+                            guardianSavedPlayerList.push({
+                                "player_name": player.player_name,
+                                "player_id": player.player_id
+                            });
+                        }
+                        else if(player.guardianVotes == guardianKillVotes){
+                            guardianSavedPlayerList.push({
+                                "player_name": player.player_name,
+                                "player_id": player.player_id
+                            });
+                        }
+                    }
+                });
+
+                // Decide Action
+                    // If there is a tie in votes, randomly select from the list
+                if(isDay){
+                    if(mafiaKilledPlayerList.length > 1){
+                        var randIndex = Math.floor(Math.random() * mafiaKilledPlayerList.length);
+                        var finalKill = mafiaKilledPlayerList[randIndex];
+                        mafiaKilledPlayerList = [];
+                        mafiaKilledPlayerList.push(finalKill);
+                    }
+                }
+                else{
+                    if(mafiaKilledPlayerList.length > 1){
+                        var randIndex = Math.floor(Math.random() * mafiaKilledPlayerList.length);
+                        var finalKill = mafiaKilledPlayerList[randIndex];
+                        mafiaKilledPlayerList = [];
+                        mafiaKilledPlayerList.push(finalKill);
+                    }
+
+                    if(guardianSavedPlayerList.length > 1){
+                        var randIndex = Math.floor(Math.random() * guardianSavedPlayerList.length);
+                        var finalSave = guardianSavedPlayerList[randIndex];
+                        guardianSavedPlayerList = [];
+                        guardianSavedPlayerList.push(finalSave);
+                    }
+                }
+                
+
+                // Log the results
+                var dayNumber = doc.game_history.length - 1;
+                if(isDay){
+                    var game_history_lynch = {  "affected_player_id": mafiaKilledPlayerList[0].player_id,
+                                                "affected_player_name": mafiaKilledPlayerList[0].player_name,
+                                                "affect": "killed"
+                                             };
+
+                    gamePrivateBulkUpdate.find({"game_id": game_id, "game_history.isDay": true, "game_history.num_day": dayNumber})
+                    .update({$push: {"game_history.$.results": game_history_lynch}});
+                }
+                else{
+                    var game_history_guardian = {   "affected_player_id": guardianSavedPlayerList[0].player_id,
+                                                    "affected_player_name": guardianSavedPlayerList[0].player_name,
+                                                    "affect": "protected"
+                                                };
+                    var game_history_mafia = {  "affected_player_id": mafiaKilledPlayerList[0].player_id,
+                                                "affected_player_name": mafiaKilledPlayerList[0].player_name,
+                                                "affect": "killed"
+                                             };
+
+                    gamePrivateBulkUpdate.find({"game_id": game_id, "game_history.isDay": false, "game_history.num_day": dayNumber})
+                    .update({$push: {"game_history.$.results": game_history_guardian}});
+                    
+                    gamePrivateBulkUpdate.find({"game_id": game_id, "game_history.isDay": false, "game_history.num_day": dayNumber})
+                    .update({$push: {"game_history.$.results": game_history_mafia}});
+                }
+
+                //Affects
+                if(isDay){
+
+                }
+                else{
+                    if(guardianSavedPlayerList[0].player_id != mafiaKilledPlayerList[0].player_id){
+                        var deadPlayer = mafiaKilledPlayerList[0];
+                        server.to(game_id).emit("death",deadPlayer);
+                    }
+                }
+
+                // Create new status log in gamePrivate table for the day
+                var dayNumber_newDay = doc.game_history.length;
+
+                var game_history_newDayNight = { "isDay": isDay,
+                                     "num_day": dayNumber_newDay,
+                                     "results": []
+                                    };  
+                
+                gamePrivateBulkUpdate.find({"game_id": game_id}).update({$push: { "game_history": game_history_newDayNight} });
+
+                gamePrivateBulkUpdate.execute(function(err,res){
+                    resolve();
+                });
+            });
+        }).then(function(){
+            // Reset all the data for day 
+            resetAll();
+
+            // Get a time one minute from now
+            var oldDateObj = new Date();
+            var timerMinutes = 1;
+            var newDateObj = new Date(oldDateObj.getTime() + timerMinutes*60000); 
+            gameBulkUpdate.find( {"game_id": clientSocket.gameRoom }).update( {$set: { "game_status.next_change_time": newDateObj} } );
+
+            // Send Client Start Day()
+            server.to(game_id).emit("newDayNight");
+        });
     }
 
     function resetAll(){
+        // Set all player finishedAction as false
         db.game.findOne({"game_id": clientSocket.gameRoom},function(err,doc){
             var gameBulkUpdate = db.game.initializeUnorderedBulkOp();
 
@@ -468,35 +658,40 @@ module.exports = function(server,clientSocket){
 
             gameBulkUpdate.execute(function(err,res){
                 //done game updates
+                resetGamePrivateData();
             });
         });
 
-        db.gamePrivate.findOne({"game_id": clientSocket.gameRoom},function(err,doc){
-            var gamePrivateBulkUpdate = db.gamePrivate.initializeUnorderedBulkOp();
+        // Set all types of votes to 0
+        function resetGamePrivateData(){
+            db.gamePrivate.findOne({"game_id": clientSocket.gameRoom},function(err,doc){
+                var gamePrivateBulkUpdate = db.gamePrivate.initializeUnorderedBulkOp();
 
-            var player_list = doc.player_status;
+                var player_list = doc.player_status;
 
-            player_list.forEach(function(player){
-                gamePrivateBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
-                                    "player_status": { $elemMatch: { "player_id": player.player_id } }
+                player_list.forEach(function(player){
+                    gamePrivateBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
+                                        "player_status": { $elemMatch: { "player_id": player.player_id } }
 
-                                }).update( {$set: { "player_status.$.lynchVotes": 0} } );
+                                    }).update( {$set: { "player_status.$.lynchVotes": 0} } );
 
-                gamePrivateBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
-                                    "player_status": { $elemMatch: { "player_id": player.player_id } }
+                    gamePrivateBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
+                                        "player_status": { $elemMatch: { "player_id": player.player_id } }
 
-                                }).update( {$set: { "player_status.$.mafiaVotes": 0} } );
+                                    }).update( {$set: { "player_status.$.mafiaVotes": 0} } );
 
-                gamePrivateBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
-                                    "player_status": { $elemMatch: { "player_id": player.player_id } }
+                    gamePrivateBulkUpdate.find( {  "game_id": clientSocket.gameRoom,
+                                        "player_status": { $elemMatch: { "player_id": player.player_id } }
 
-                                }).update( {$set: { "player_status.$.guardianVotes": 0} } );
+                                    }).update( {$set: { "player_status.$.guardianVotes": 0} } );
+                });
+
+                gamePrivateBulkUpdate.execute(function(err,res){
+                    //done game Private updates
+
+                });
             });
-
-            gamePrivateBulkUpdate.execute(function(err,res){
-                //done game Private updates
-            });
-        });
+        }
     }
 
 };

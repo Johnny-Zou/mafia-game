@@ -32,6 +32,10 @@ class ChatFeatures extends Component {
 			.done(function( json ) {
 				console.log("current chat log:", json.chat_log);
 				self.setState({chat_log: json.chat_log});
+				var player_nameList = json.player_list.map(function(player){
+					return player.name;
+				});
+				self.setState({player_list: player_nameList});
 
 				//scroll down
 				var element = document.getElementById("scrollableChat");

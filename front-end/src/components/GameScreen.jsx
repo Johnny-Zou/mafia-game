@@ -13,6 +13,8 @@ class GameScreen extends Component {
 	  	this.savePlayerSelect = this.savePlayerSelect.bind(this);
 
 	  	this.endTurn = this.endTurn.bind(this);
+	  	this.reloadGameData = this.reloadGameData.bind(this);
+	  	this.reloadPlayerData = this.reloadPlayerData.bind(this);
 
 	  	this.state = { player: {},
 	  				   game: {},
@@ -20,14 +22,46 @@ class GameScreen extends Component {
 	  				   game_ready: false,
 	  				   player_select_name: "none",
 	  				   player_select_id: "none",
-	  				   new_player_select_id: "none"
+	  				   new_player_select_id: "none",
+	  				   "countDownDate": null,
+	  				   "timeLeft": {},
 	  				};
+
+	  	// Timer stuff
+	  	this.timer = 0;
+	    this.startTimer = this.startTimer.bind(this);
+	    this.countDown = this.countDown.bind(this);
+	    this.getTimeRemaining = this.getTimeRemaining.bind(this);
 	}
 
 
 	componentDidMount(){
 		const client = this.props.client;
 		//get request to fetch player's role
+		reloadGameData();
+		reloadPlayerData();
+		reloadTimeLeft();
+		startTimer();
+		// Socket event listeners
+		client.on('alertClient', this._alertClient.bind(this));
+	}
+
+	reloadGameData(){
+		var self = this;
+		$.getJSON("http://" + this.props.serverURL + "/api/game/" + this.props.game_id)
+			.done(function( json ) {
+				//get the entire player object
+				self.setState({game: json, game_ready: true});
+			})
+			.fail(function( jqxhr, textStatus, error ) {
+				if(jqxhr.status == 404){
+					console.log("game" + this.props.game_id + "does not exist");
+				}
+			}
+		);
+	}
+
+	reloadPlayerData(){
 		var self = this;
 		$.getJSON("http://" + this.props.serverURL + "/api/player/" + this.props.player_id)
 			.done(function( json ) {
@@ -40,20 +74,54 @@ class GameScreen extends Component {
 				}
 			}
 		);
-		$.getJSON("http://" + this.props.serverURL + "/api/game/" + this.props.game_id)
-			.done(function( json ) {
-				//get the entire player object
-				self.setState({game: json, game_ready: true});
-			})
-			.fail(function( jqxhr, textStatus, error ) {
-				if(jqxhr.status == 404){
-					console.log("game" + this.props.game_id + "does not exist");
-				}
-			}
-		);
+	}
 
-		// Socket event listeners
-		client.on('alertClient', this._alertClient.bind(this));
+	reloadTimeLeft(){
+		var next_change_time_new = this.state.game.game_status.next_change_time;
+		this.setState({
+			countDownDate: next_change_time_new
+		});
+	}
+
+	// Timer Stuff
+	getTimeRemaining(){
+		var now = new Date().getTime();
+
+	    // Find the distance between now an the count down date
+	    var distance = this.state.countDownDate - now;
+
+	    // Time calculations for days, hours, minutes and seconds
+	    var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+	    var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+	    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+	    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+	    var obj = 	{ "d": days,
+	    			  "h": hours,
+	    			  "m": minutes,
+	    			  "s": seconds
+	    			};
+
+	    return obj;
+	}
+
+	startTimer(){
+		if (this.timer == 0) {
+	      this.timer = setInterval(this.countDown, 1000);
+	    }
+	}
+	countDown(){
+		// Remove one second, set state so a re-render happens.
+	    this.setState({
+	      timeLeft: getTimeRemaining(),
+	    });
+	    
+	    // Check if we're at zero.
+	    var now = new Date().getTime();
+	    var difference = this.state.countDownDate - now;
+	    if (difference <= 0) { 
+	      clearInterval(this.timer);
+	    }
 	}
 
 	handlePlayerSelectChange(e){
@@ -71,7 +139,7 @@ class GameScreen extends Component {
 
 	endTurn(){
 		const client = this.props.client;
-		if(this.state.game.game_status.day){
+		if(this.state.game.game_status.isDay){
 			var dataLynch = {player_id: this.props.player_id, target_player_id: this.state.player_select_id};
 			client.emit("submitLynchAction",dataLynch);
 		}
@@ -117,7 +185,7 @@ class GameScreen extends Component {
 			case "guardianAngel":
 				var playerList = this.state.game.player_list;
 				var foundPlayer = playerList.find(element => element.player_id == data.target_player_id);
-				window.alert(data.target_player_name + " will be saved");
+				window.alert(foundPlayer.player_name + " will be saved");
 				break;
 			case "townsPeople":
 				break;
@@ -164,9 +232,22 @@ class GameScreen extends Component {
 								{playerSelectModal}
 							</div>;
 
+			var infoList = <ul className="list-group">
+									<li className="list-group-item">Game ID: {this.props.game_id}</li>
+									<li className="list-group-item">Game Role: {this.state.player.role} </li>
+									<li className="list-group-item">Game Day: {this.state.game.game_status.isDay_counter}</li>
+									<li className="list-group-item">Currently: {this.state.game.game_status.isDay ? "day" : "night"}</li>
+									<li className="list-group-item">Time Left: {this.state.timeLeft.m} min {this.state.timeLeft.s} seconds</li>
+									<li className="list-group-item">Currently Selected: {this.state.player_select_name}</li>
+								</ul>;
+
+			var playerList = this.state.game.player_list.map((playerObj) =>
+									<li className="{playerObj.isAlive ? 'list-group-item' : 'list-group-item-danger'}">player Name: {playerObj.player_name}</li>
+								);
+
 			switch(this.state.player.role){
 				case "detective":
-					if(!this.state.game.game_status.day){
+					if(!this.state.game.game_status.isDay){
 						actions = 	<div className="row justify-content-center text-center">
 										<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
 						       				<button type="button" className="btn btn-lg btn-danger" data-toggle="modal" data-target="#playerSelectModalLynch">Investigate</button>
@@ -188,13 +269,18 @@ class GameScreen extends Component {
 									<div className="card-body">Game Info</div>
 								</div>
 								<br/>
-								<ul className="list-group col-6 mx-auto">
-									<li className="list-group-item">Game ID: {this.props.game_id}</li>
-									<li className="list-group-item">Game Role: {this.state.player.role} </li>
-									<li className="list-group-item">Game Day: {this.state.game.game_status.day_counter}</li>
-									<li className="list-group-item">Currently: {this.state.game.game_status.day ? "day" : "night"}</li>
-									<li className="list-group-item">Currently Selected: {this.state.player_select_name}</li>
-								</ul>
+								<div className="row justify-content-center text-center">
+									<div className="col-6 mx-auto">
+										<h3>GameDetails</h3>
+										{infoList}
+									</div>
+									<div className="col-6 mx-auto">
+										<h3>Player List</h3>
+										<ul className="list-group">
+											{playerList}
+										</ul>
+									</div>
+								</div>
 							</div>
 
 							<br/>
@@ -210,7 +296,7 @@ class GameScreen extends Component {
 								<br/>
 								<div className="row justify-content-center text-center">
 									<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
-					       				<button type="button" className="btn btn-primary" onClick={this.endTurn}>End {this.state.game.game_status.day ? "day" : "night"}</button>
+					       				<button type="button" className="btn btn-primary" onClick={this.endTurn}>End {this.state.game.game_status.isDay ? "day" : "night"}</button>
 					       			</div>
 					       			<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
 					       				<button type="button" className="btn btn-primary" disabled>Quit Game</button>
@@ -232,7 +318,7 @@ class GameScreen extends Component {
 						</div>
 					);
 				case "mafia":
-					if(!this.state.game.game_status.day){
+					if(!this.state.game.game_status.isDay){
 						actions = 	<div className="row justify-content-center text-center">
 										<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
 						       				<button type="button" className="btn btn-lg btn-danger" data-toggle="modal" data-target="#playerSelectModalLynch">Kill</button>
@@ -254,13 +340,7 @@ class GameScreen extends Component {
 									<div className="card-body">Game Info</div>
 								</div>
 								<br/>
-								<ul className="list-group col-6 mx-auto">
-									<li className="list-group-item">Game ID: {this.props.game_id}</li>
-									<li className="list-group-item">Game Role: {this.state.player.role} </li>
-									<li className="list-group-item">Game Day: {this.state.game.game_status.day_counter}</li>
-									<li className="list-group-item">Currently: {this.state.game.game_status.day ? "day" : "night"}</li>
-									<li className="list-group-item">Currently Selected: {this.state.player_select_name}</li>
-								</ul>
+								{infoList}
 							</div>
 
 							<br/>
@@ -276,7 +356,7 @@ class GameScreen extends Component {
 								<br/>
 								<div className="row justify-content-center text-center">
 									<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
-					       				<button type="button" className="btn btn-primary" onClick={this.endTurn}>End {this.state.game.game_status.day ? "day" : "night"}</button>
+					       				<button type="button" className="btn btn-primary" onClick={this.endTurn}>End {this.state.game.game_status.isDay ? "day" : "night"}</button>
 					       			</div>
 					       			<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
 					       				<button type="button" className="btn btn-primary" disabled>Quit Game</button>
@@ -298,7 +378,7 @@ class GameScreen extends Component {
 						</div>
 					);
 				case "guardianAngel":
-					if(!this.state.game.game_status.day){
+					if(!this.state.game.game_status.isDay){
 						actions = 	<div className="row justify-content-center text-center">
 										<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
 						       				<button type="button" className="btn btn-lg btn-danger" data-toggle="modal" data-target="#playerSelectModalLynch">Save</button>
@@ -320,13 +400,7 @@ class GameScreen extends Component {
 									<div className="card-body">Game Info</div>
 								</div>
 								<br/>
-								<ul className="list-group col-6 mx-auto">
-									<li className="list-group-item">Game ID: {this.props.game_id}</li>
-									<li className="list-group-item">Game Role: {this.state.player.role} </li>
-									<li className="list-group-item">Game Day: {this.state.game.game_status.day_counter}</li>
-									<li className="list-group-item">Currently: {this.state.game.game_status.day ? "day" : "night"}</li>
-									<li className="list-group-item">Currently Selected: {this.state.player_select_name}</li>
-								</ul>
+								{infoList}
 							</div>
 
 							<br/>
@@ -342,7 +416,7 @@ class GameScreen extends Component {
 								<br/>
 								<div className="row justify-content-center text-center">
 									<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
-					       				<button type="button" className="btn btn-primary" onClick={this.endTurn}>End {this.state.game.game_status.day ? "day" : "night"}</button>
+					       				<button type="button" className="btn btn-primary" onClick={this.endTurn}>End {this.state.game.game_status.isDay ? "day" : "night"}</button>
 					       			</div>
 					       			<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
 					       				<button type="button" className="btn btn-primary" disabled>Quit Game</button>
@@ -364,7 +438,7 @@ class GameScreen extends Component {
 						</div>
 					);
 				case "townsPeople":
-					if(!this.state.game.game_status.day){
+					if(!this.state.game.game_status.isDay){
 						actions = 	<div className="row justify-content-center text-center">
 										<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
 						       				<button type="button" className="btn btn-lg btn-danger" disable>Chill</button>
@@ -385,13 +459,7 @@ class GameScreen extends Component {
 									<div className="card-body">Game Info</div>
 								</div>
 								<br/>
-								<ul className="list-group col-6 mx-auto">
-									<li className="list-group-item">Game ID: {this.props.game_id}</li>
-									<li className="list-group-item">Game Role: {this.state.player.role}</li>
-									<li className="list-group-item">Game Day: {this.state.game.game_status.day_counter}</li>
-									<li className="list-group-item">Currently: {this.state.game.game_status.day ? "day" : "night"}</li>
-									<li className="list-group-item">Currently Selected: {this.state.player_select_name}</li>
-								</ul>
+								{infoList}
 							</div>
 
 							<br/>
@@ -407,7 +475,7 @@ class GameScreen extends Component {
 								<br/>
 								<div className="row justify-content-center text-center">
 									<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
-					       				<button type="button" className="btn btn-primary" onClick={this.endTurn}>End {this.state.game.game_status.day ? "day" : "night"}</button>
+					       				<button type="button" className="btn btn-primary" onClick={this.endTurn}>End {this.state.game.game_status.isDay ? "day" : "night"}</button>
 					       			</div>
 					       			<div className="col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">
 					       				<button type="button" className="btn btn-primary" disabled>Quit Game</button>

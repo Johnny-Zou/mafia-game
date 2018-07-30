@@ -7,7 +7,8 @@
 	"game_admin": "asdasd",
 	"game_status": { "game_started": true,
 					 "day_counter": 1,
-					 "day": true,
+					 "isDay": true,
+					 "next_change_time": "date()",			//Contains the date for the next day/night
 					 "gameRoles": [	{ 	"type": "detective",
 					 				 	"amount": "1",
 					 				},
@@ -51,7 +52,7 @@
 	"game_history": [ 
 						{	"isDay": false,
 							"num_day": 1,
-							"status": 	[
+							"results": 	[
 											{	"affected_player_ID": "4124124",
 												"affect": "investigated"
 											},
@@ -67,12 +68,14 @@
 	"player_status":[	
 						{	"player_id": "player-id1",
 							"player_name": "player's name",
+							"player_role": "detective",
 							"lynchVotes": 1,
 							"mafiaVotes": 1,
 							"guardianVotes": 1,
 						},
 						{	"player_id": "player-id2",
 							"player_name": "player's name",
+							"player_role": "mafia",
 							"lynchVotes": 1,
 							"mafiaVotes": 1,
 							"guardianVotes": 1,
@@ -88,15 +91,20 @@
 	"socket_id": "clientSocket.socket_id",
 	"player_name": "billy",
 	"inGame": false,
-	"role": "",																				
-	"actionArray": ["pendingDeath","gaurdianSaved"],
+	"role": "",																			
 }
 
 
 
 
 
-
+// TODO
+figure out what happens when the timer runs out
+	client send timer done to server?
+	server timer as well?
+client response to emit newDayNight from server
+client response to emit death from server with player_name and player_id <- maybe wont need
+server what if vote = 0 for lynch and kill
 
 
 
